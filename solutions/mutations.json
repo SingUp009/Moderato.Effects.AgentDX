@@ -1,0 +1,7 @@
+{
+  "typed-errors": ["if (quantity > stock)", "if (quantity > stock + 1)"],
+  "resources": ["handle.Close(exit, cancellationToken)", "handle.Close(new Succeeded(), cancellationToken)"],
+  "cancellation": ["Async(load)", "Async(_ => load(CancellationToken.None))"],
+  "composition": ["request.Retry(Schedule.Immediately.UpTo(2), when: error => error is TransientFetchError).Timeout(deadline)", "request.Timeout(deadline).Retry(Schedule.Immediately.UpTo(2), when: error => error is TransientFetchError)"],
+  "dependencies": ["return rate * quantity;", "return rate;"]
+}

@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "dependencies": {
+    "net11.0": {
+      "Moderato.Effects": {
+        "type": "Direct",
+        "requested": "[0.1.0-preview.6, 0.1.0-preview.6]",
+        "resolved": "0.1.0-preview.6",
+        "contentHash": "awKqwLS9YcFns1ZIYvQ7+d4EhhyEf6UR88lJHkDtKWACOLZ0cW8g+2oukt5Yoj1xaICDZPOC/j29vfD7SEqk1A==",
+        "dependencies": {
+          "Moderato.Results": "0.1.0-preview.4"
+        }
+      },
+      "Moderato.Results": {
+        "type": "Transitive",
+        "resolved": "0.1.0-preview.4",
+        "contentHash": "1jgyDzsyFIGhfwTIXfZ/AUbYWhkvN3cJUcBereaIiuBwvnwAYaSiK4w7yj75Pn6OFbCcDObkq/vUCPrVAudhqw=="
+      }
+    }
+  }
+}

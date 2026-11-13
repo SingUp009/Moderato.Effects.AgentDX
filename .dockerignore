@@ -1,0 +1,16 @@
+*
+!fixture/
+!fixture/**
+!graders/
+!graders/**
+!tasks/
+!tasks/**
+!solutions/
+!solutions/mutations.json
+!run.mjs
+!report.mjs
+!global.json
+!live/
+!live/Dockerfile
+**/bin
+**/obj

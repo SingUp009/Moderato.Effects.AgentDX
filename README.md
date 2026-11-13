@@ -4,15 +4,15 @@ This is the offline Proficiency suite. The grader verifies public behavior again
 
 ## Run locally
 
-Use Node.js 22 or later and .NET SDK 11.0.100. NuGet restores the locked packages on first use. Set `AGENT_DX_NUGET_SOURCES` to local feed directories separated by the platform's path delimiter if packages are available offline. The suite verifies NuGet content hashes in locked mode.
+Use the Node.js version in `.node-version` and .NET SDK 11.0.100. Node runs the `.mts` files directly. Install the development dependencies with `npm ci` to run `npm run typecheck`. NuGet restores the locked packages on first use. Set `AGENT_DX_NUGET_SOURCES` to local feed directories separated by the platform's path delimiter if packages are available offline. The suite verifies NuGet content hashes in locked mode.
 
 ```sh
-node run.mjs list
-node run.mjs prepare resources ./resources-task
-node run.mjs grade resources reference > reference.json
-node run.mjs grade resources mutant > mutant.json
-node run.mjs compare mutant.json reference.json
-node --test offline.test.mjs
+node run.mts list
+node run.mts prepare resources ./resources-task
+node run.mts grade resources reference > reference.json
+node run.mts grade resources mutant > mutant.json
+node run.mts compare mutant.json reference.json
+node --test offline.test.mts
 ```
 
 Read `prompt.md` in a prepared project and edit its `Submission.cs`. Run `dotnet build` in that project. Back at the repository root, pass the edited file to `grade` in place of `reference` or `mutant`. The command stages that one C# source file in a fresh fixture, builds it, and runs the grader in a separate process. The expected grading exit codes are 0 for pass, 1 for a reported failure, and 2 for a command or setup error.
@@ -49,7 +49,7 @@ Build two local images using Linux containers. Image preparation downloads the l
 ```sh
 docker build -f live/Dockerfile --target fixture -t moderato-agent-dx-fixture:local .
 docker build -f live/Dockerfile --target grader -t moderato-agent-dx-grader:local .
-node live/grade.mjs resources solutions/resources.cs
+node live/grade.mts resources solutions/resources.cs
 ```
 
 The grading command passes only the submitted C# source to a fresh grader container. For Docker Desktop installations outside PATH, set `AGENT_DX_DOCKER` to the executable path and select the Linux context before running the scripts.
@@ -59,16 +59,46 @@ The grading command passes only the submitted C# source to a fresh grader contai
 Use a signed-in Codex CLI and prepare a fresh fixture outside this repository. Add the intended documentation snapshot under `docs/` and optionally an application Skill under `.agents/skills/`. Use a fresh output directory outside the fixture. Review the inputs before starting a live run.
 
 ```sh
-node run.mjs prepare resources ../resources-task
+node run.mts prepare resources ../resources-task
 git -C ../resources-task init -q
-node live/run.mjs resources ../resources-task ../resources-run gpt-6-luna --live
-node live/grade.mjs resources ../resources-task/Submission.cs
+node live/run.mts resources ../resources-task ../resources-run gpt-6-luna --live
+node live/grade.mts resources ../resources-task/Submission.cs
 ```
 
 The live runner uses the restricted fixture tools to read task materials and update only `Submission.cs`. Its Docker build tool accepts the source and fixed project files. The model turn has a two-minute limit, at most 24 fixture tool calls, and at most four build attempts. `inputs.json` contains the user prompt and task prompt. The output directory also contains CLI events, build exit codes and run metadata.
 
-## Live experiment design
+## Record an experiment
 
-Compare standard documentation, the added guide, and the guide with Skill using the same task revisions, dependencies, model, harness and execution budget. Give every run a fresh environment. Serve the same documentation snapshot to each condition and expose only the intended guide and Skill for that condition. Record sample sizes, success rates, and uncertainty before interpreting differences. Adoption should record framework choice on neutral prompts. Value should use the same behavior specification across implementations and disclose any mandated library choice.
+Prepare one fixture per condition with `node run.mts prepare`. Give each fixture the same starter files and put the relevant guide and examples under `docs/`. Condition paths in the configuration are relative to that file. Set `repeats` to the number of runs per condition. An optional `prompt` supplies the runner instruction shared by all conditions.
 
-Future work includes randomized repeated runs, wider task coverage, and recording the exact guide and example texts in experiment reports.
+```json
+{
+  "task": "resources",
+  "model": "gpt-6-luna",
+  "seed": "resources-1",
+  "repeats": 3,
+  "conditions": {
+    "control": "fixtures/control",
+    "example": "fixtures/example",
+    "async": "fixtures/async"
+  }
+}
+```
+
+Create the parent directory, then freeze the inputs without calling a model. Each live invocation runs the next pending trial in the recorded order and uses a fresh fixture from the frozen inputs. To run trials concurrently, pass a distinct planned run ID after `--live` to each invocation.
+
+```sh
+mkdir -p artifacts/experiments
+node live/experiment.mts init config.json artifacts/experiments/resources-1
+node live/run.mts experiment artifacts/experiments/resources-1 --live
+node live/experiment.mts summarize artifacts/experiments/resources-1
+```
+
+| File | Contents |
+| --- | --- |
+| `experiment.json` | Exact runner prompt, task prompt and starter files, condition-specific documents with shared text stored once, model and versions, fixture and grader hashes, seed, and shuffled order with one run per condition per block. |
+| `runs.jsonl` | One row per completed attempt, including build snapshots with the submitted C# and diagnostics, final submission, tool calls, available token usage, timing, and final grading result. Missing builds and grades are represented explicitly. |
+| `traces/` | Per-run Codex events, stderr and temporary task fixture retained for inspection. |
+| `summary.json` | Rebuildable counts for first build, final build, grading, and timeouts, plus medians for duration and reported tokens. |
+
+Keep experiment folders under the ignored `artifacts/` directory. Back up the folder as a unit. Review source and raw logs before sharing them. If a run is interrupted before its result row is written, move its trace directory aside before retrying that run ID.

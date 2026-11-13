@@ -1,15 +1,15 @@
 import { readFileSync } from 'node:fs';
-import { dockerRun } from './docker.mjs';
+import { dockerRun } from './docker.mts';
 
 const [task, file, ...extra] = process.argv.slice(2);
 if (!task || !file || extra.length) {
-  console.error('Usage: node live/grade.mjs TASK SUBMISSION.cs');
+  console.error('Usage: node live/grade.mts TASK SUBMISSION.cs');
   process.exit(2);
 }
 
 const result = dockerRun(
   'moderato-agent-dx-grader:local',
-  'set -eu; cat > /tmp/Submission.cs; exec node run.mjs grade "$1" /tmp/Submission.cs',
+  'set -eu; cat > /tmp/Submission.cs; exec node run.mts grade "$1" /tmp/Submission.cs',
   readFileSync(file),
   { args: [task], timeout: 180_000 },
 );

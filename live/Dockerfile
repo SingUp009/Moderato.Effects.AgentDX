@@ -22,7 +22,7 @@ FROM sdk AS grader
 COPY --from=node /usr/local/bin/node /usr/local/bin/node
 COPY --from=grader-packages /feed/ /feed/
 WORKDIR /opt/agent-dx
-COPY global.json run.mjs report.mjs ./
+COPY global.json run.mts report.mts ./
 COPY fixture/ fixture/
 COPY tasks/ tasks/
 COPY graders/ graders/

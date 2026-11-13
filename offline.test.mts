@@ -3,8 +3,8 @@ import { mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'n
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import test from 'node:test';
-import { compare, validate } from './report.mjs';
-import { grade, prepare, taskIds } from './run.mjs';
+import { compare, validate } from './report.mts';
+import { grade, prepare, taskIds } from './run.mts';
 
 test('discovers tasks and prepares a clean agent-visible project', () => {
   const root = mkdtempSync(join(tmpdir(), 'moderato-fixture-test-'));
@@ -32,14 +32,15 @@ test('reference submissions pass and compiling mistakes fail the graders', () =>
       const good = grade(id, 'reference', root);
       assert.equal(good.success, true, JSON.stringify(good));
       assert.equal(good.testsPassed, good.testsTotal);
-      assert.ok(good.testsTotal >= 3);
+      assert.ok(good.testsTotal !== null && good.testsTotal >= 3);
       assert.deepEqual(readdirSync(root), []);
 
       const bad = grade(id, 'mutant', root);
       assert.equal(bad.buildSucceeded, true, JSON.stringify(bad));
       assert.equal(bad.success, false);
       assert.equal(bad.failureCategory, 'behavior');
-      assert.ok(bad.testsPassed > 0 && bad.testsPassed < bad.testsTotal);
+      assert.ok(bad.testsPassed !== null && bad.testsTotal !== null &&
+        bad.testsPassed > 0 && bad.testsPassed < bad.testsTotal);
       assert.notEqual(bad.submissionHash, good.submissionHash);
       assert.equal(compare(bad, good).successPercentagePoints, 100);
       assert.deepEqual(readdirSync(root), []);

@@ -4,7 +4,8 @@ import { tmpdir } from 'node:os';
 import { delimiter, join, resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { compare, validate } from './report.mjs';
+import { compare, validate } from './report.mts';
+import type { GradeReport } from './report.mts';
 
 const root = fileURLToPath(new URL('.', import.meta.url));
 const tasks = join(root, 'tasks');
@@ -12,7 +13,7 @@ const taskIds = readdirSync(tasks).filter(id => existsSync(join(tasks, id, 'prom
 const mutations = JSON.parse(readFileSync(join(root, 'solutions/mutations.json'), 'utf8'));
 const sdk = JSON.parse(readFileSync(join(root, 'global.json'), 'utf8')).sdk.version;
 
-function prepare(id, workspace) {
+function prepare(id: string, workspace: string) {
   if (!taskIds.includes(id)) throw new Error('Unknown task: ' + id);
   mkdirSync(workspace);
   try {
@@ -30,26 +31,31 @@ function prepare(id, workspace) {
   }
 }
 
-function readText(path) {
+function readText(path: string) {
   return readFileSync(path, 'utf8').replaceAll('\r\n', '\n');
 }
 
-function revision(directory) {
+function revision(directory: string, names = readdirSync(directory)) {
   const hash = createHash('sha256');
-  for (const name of readdirSync(directory).sort()) {
+  for (const name of [...names].sort()) {
     hash.update(name + '\0').update(readText(join(directory, name))).update('\0');
   }
   return hash.digest('hex');
 }
 
-function dotnet(cwd, args) {
+function graderFiles(id: string) {
+  const testName = id.split('-').map(part => part[0].toUpperCase() + part.slice(1)).join('') + 'Tests.cs';
+  return ['Grader.csproj', 'packages.lock.json', testName];
+}
+
+function dotnet(cwd: string, args: string[]) {
   return spawnSync('dotnet', args, {
     cwd, encoding: 'utf8', timeout: 60_000, windowsHide: true,
     env: { ...process.env, DOTNET_CLI_TELEMETRY_OPTOUT: '1', DOTNET_CLI_UI_LANGUAGE: 'en-US' },
   });
 }
 
-function build(workspace, project) {
+function build(workspace: string, project: string) {
   const sources = (process.env.AGENT_DX_NUGET_SOURCES ?? '').split(delimiter).filter(Boolean);
   const restore = dotnet(workspace, ['restore', project, '--locked-mode', '-p:NuGetAudit=false',
     ...sources.flatMap(source => ['--source', resolve(source)])]);
@@ -57,7 +63,7 @@ function build(workspace, project) {
   return { result: dotnet(workspace, ['build', project, '-c', 'Release', '--no-restore', '--disable-build-servers']), stage: 'build' };
 }
 
-function grade(id, variant, workspaceRoot = tmpdir()) {
+function grade(id: string, variant: string, workspaceRoot = tmpdir()) {
   if (!taskIds.includes(id)) throw new Error('Unknown task: ' + id);
   const startedAt = new Date().toISOString();
   const start = performance.now();
@@ -67,8 +73,7 @@ function grade(id, variant, workspaceRoot = tmpdir()) {
     prepare(id, submission);
     const graders = join(workspace, 'graders');
     mkdirSync(graders);
-    const testName = id.split('-').map(part => part[0].toUpperCase() + part.slice(1)).join('') + 'Tests.cs';
-    for (const name of ['Grader.csproj', 'packages.lock.json', testName]) {
+    for (const name of graderFiles(id)) {
       cpSync(join(root, 'graders', name), join(graders, name));
     }
     const fixtureRevision = revision(submission);
@@ -93,9 +98,10 @@ function grade(id, variant, workspaceRoot = tmpdir()) {
     }
     writeFileSync(join(submission, 'Submission.cs'), solution);
     const packageVersion = readFileSync(join(submission, 'Submission.csproj'), 'utf8')
-      .match(/Include="Moderato\.Effects" Version="\[([^\]]+)\]"/)[1];
+      .match(/Include="Moderato\.Effects" Version="\[([^\]]+)\]"/)?.[1];
+    if (!packageVersion) throw new Error('Expected a pinned Moderato.Effects version');
 
-    const report = {
+    const report: GradeReport = {
       schemaVersion: 1, runId: randomUUID(), suite: 'proficiency', taskId: id, taskVersion: 1,
       variant: variant === 'reference' || variant === 'mutant' ? variant : 'local-submission',
       model: null, provider: null, harnessVersion: null, sdkVersion: sdk, packageVersion,
@@ -108,20 +114,20 @@ function grade(id, variant, workspaceRoot = tmpdir()) {
     const submitted = build(workspace, 'submission/Submission.csproj');
     if (submitted.result.status !== 0) {
       logFailure(submitted.result);
-      report.failureCategory = submitted.result.error?.code === 'ETIMEDOUT' ? 'timeout' :
+      report.failureCategory = (submitted.result.error as NodeJS.ErrnoException | undefined)?.code === 'ETIMEDOUT' ? 'timeout' :
         submitted.stage === 'restore' ? 'restore' : 'submission-build';
     } else {
       report.buildSucceeded = true;
       const grading = build(workspace, 'graders/Grader.csproj');
       if (grading.result.status !== 0) {
         logFailure(grading.result);
-        report.failureCategory = grading.result.error?.code === 'ETIMEDOUT' ? 'timeout' : 'grader-build';
+        report.failureCategory = (grading.result.error as NodeJS.ErrnoException | undefined)?.code === 'ETIMEDOUT' ? 'timeout' : 'grader-build';
       } else {
         const xml = join(workspace, 'results.xml');
         const result = dotnet(workspace, ['graders/bin/Release/net11.0/Grader.dll', '-noAutoReporters', '-result-xml', xml]);
         if (result.status !== 0 && result.status !== 1) {
           logFailure(result);
-          report.failureCategory = result.error?.code === 'ETIMEDOUT' ? 'timeout' : 'grader-run';
+          report.failureCategory = (result.error as NodeJS.ErrnoException | undefined)?.code === 'ETIMEDOUT' ? 'timeout' : 'grader-run';
         } else {
           const data = existsSync(xml) ? readFileSync(xml, 'utf8') : '';
           const assembly = data.match(/<assembly\s[^>]*>/)?.[0] ?? '';
@@ -146,11 +152,11 @@ function grade(id, variant, workspaceRoot = tmpdir()) {
   }
 }
 
-function logFailure(result) {
+function logFailure(result: ReturnType<typeof dotnet>) {
   process.stderr.write([result.error?.message, result.stdout, result.stderr].filter(Boolean).join('\n') + '\n');
 }
 
-export { grade, prepare, taskIds };
+export { grade, graderFiles, prepare, revision, taskIds };
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const [command, first, second, ...extra] = process.argv.slice(2);
@@ -162,13 +168,13 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
       console.log(JSON.stringify(report, null, 2));
       process.exitCode = report.success ? 0 : 1;
     } else if (command === 'compare' && first && second && !extra.length) {
-      const read = file => JSON.parse(readFileSync(file, 'utf8'));
+      const read = (file: string): unknown => JSON.parse(readFileSync(file, 'utf8'));
       console.log(JSON.stringify(compare(read(first), read(second)), null, 2));
     } else {
-      throw new Error('Usage: node agent-dx/run.mjs list | prepare TASK NEW_DIR | grade TASK reference|mutant|SOURCE.cs | compare FIRST.json SECOND.json');
+      throw new Error('Usage: node agent-dx/run.mts list | prepare TASK NEW_DIR | grade TASK reference|mutant|SOURCE.cs | compare FIRST.json SECOND.json');
     }
   } catch (error) {
-    console.error(error.message);
+    console.error(error instanceof Error ? error.message : String(error));
     process.exitCode = 2;
   }
 }

@@ -1,0 +1,12 @@
+{
+  "name": "moderato-effects-agentdx",
+  "private": true,
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "node --test offline.test.mts live/*.test.mts"
+  },
+  "devDependencies": {
+    "@types/node": "26.6.6",
+    "typescript": "6.0.3"
+  }
+}

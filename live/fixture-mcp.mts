@@ -1,41 +1,27 @@
-import { existsSync, lstatSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import { tmpdir } from 'node:os';
-import { join, relative, sep } from 'node:path';
+import { join } from 'node:path';
 import { createInterface } from 'node:readline';
-import { dockerRun } from './docker.mjs';
+import { dockerRun } from './docker.mts';
+import { readFixture, starterFiles } from './fixture-files.mts';
+import { loadInputs, settings } from './experiment.mts';
+import type { BuildRecord } from './experiment.mts';
 
-const [root, task, usageFile] = process.argv.slice(2);
-const files = new Map();
-const starterFiles = ['prompt.md', 'Submission.cs', 'Contract.cs', 'Submission.csproj', 'global.json', 'packages.lock.json'];
-const docRoot = join(root, 'docs');
-
-for (const name of [...starterFiles, '.agents/skills/moderato-effects/SKILL.md']) {
-  const path = join(root, name);
-  if (existsSync(path) && lstatSync(path).isFile()) files.set(name, readFileSync(path, 'utf8'));
-}
-if (existsSync(docRoot) && lstatSync(docRoot).isDirectory()) {
-  for (const entry of readdirSync(docRoot, { recursive: true, withFileTypes: true })) {
-    if (!entry.isFile() || !/\.(md|txt)$/.test(entry.name)) continue;
-    const path = join(entry.parentPath, entry.name);
-    files.set(relative(root, path).split(sep).join('/'), readFileSync(path, 'utf8'));
-  }
-}
-if (!starterFiles.filter(name => name !== 'Contract.cs').every(name => files.has(name))) {
-  throw new Error('Expected a prepared fixture');
-}
+const [root, task, usageFile, snapshot, condition] = process.argv.slice(2);
+const files = snapshot ? loadInputs(snapshot, condition) : readFixture(root);
 if (!/^[a-z]+(?:-[a-z]+)*$/.test(task)) throw new Error('Invalid task ID');
 
-const usage = { calls: 0, builds: [] };
-const tools = {
+const usage: { calls: number; builds: BuildRecord[] } = { calls: 0, builds: [] };
+const tools: Record<string, [string, Record<string, { type: string }>]> = {
   list_files: ['List task files and documentation.', {}],
   read_file: ['Read one relative task file.', { file: { type: 'string' } }],
   write_submission: ['Replace Submission.cs with the complete C# source.', { source: { type: 'string' } }],
   build_submission: ['Build Submission.cs with the pinned SDK in offline Docker.', {}],
 };
 
-function call(name, args) {
-  if (++usage.calls > 24) throw new Error('Tool budget exhausted');
+function call(name: string, args: Record<string, unknown>) {
+  if (++usage.calls > settings.toolLimit) throw new Error('Tool budget exhausted');
   if (!Object.hasOwn(tools, name) || Object.keys(args).some(key => !Object.hasOwn(tools[name][1], key))) {
     throw new Error('Unsupported tool or argument');
   }
@@ -43,7 +29,7 @@ function call(name, args) {
     case 'list_files':
       return [...files.keys()].join('\n');
     case 'read_file':
-      if (!files.has(args.file)) throw new Error('File unavailable');
+      if (typeof args.file !== 'string' || !files.has(args.file)) throw new Error('File unavailable');
       return files.get(args.file);
     case 'write_submission':
       if (typeof args.source !== 'string' || args.source.length > 32_768) throw new Error('Invalid source');
@@ -51,7 +37,7 @@ function call(name, args) {
       files.set('Submission.cs', args.source);
       return 'Saved';
     case 'build_submission': {
-      if (usage.builds.length >= 4) throw new Error('Build budget exhausted');
+      if (usage.builds.length >= settings.buildLimit) throw new Error('Build budget exhausted');
       const script = [
         'set -eu',
         'mkdir /tmp/work',
@@ -61,8 +47,15 @@ function call(name, args) {
         'dotnet build -c Release --no-restore --disable-build-servers',
       ].join('; ');
       const result = dockerRun('moderato-agent-dx-fixture:local', script, archive());
-      usage.builds.push(result.status);
-      return [result.error?.message, result.stdout, result.stderr].filter(Boolean).join('\n').slice(0, 12_000);
+      const build = {
+        source: files.get('Submission.cs')!,
+        exitCode: result.status,
+        error: result.error?.message ?? null,
+        stdout: result.stdout,
+        stderr: result.stderr,
+      };
+      usage.builds.push(build);
+      return [build.error, build.stdout, build.stderr].filter(Boolean).join('\n').slice(0, 12_000);
     }
     default:
       throw new Error('Tool unavailable');
@@ -73,7 +66,7 @@ function archive() {
   const folder = mkdtempSync(join(tmpdir(), 'agent-dx-build-'));
   try {
     const names = starterFiles.filter(name => files.has(name));
-    for (const name of names) writeFileSync(join(folder, name), files.get(name));
+    for (const name of names) writeFileSync(join(folder, name), files.get(name)!);
     const tar = spawnSync('tar', ['-cf', '-', ...names], { cwd: folder, windowsHide: true });
     if (tar.status !== 0) throw new Error(tar.error?.message ?? tar.stderr.toString());
     return tar.stdout;
@@ -98,7 +91,7 @@ for await (const line of createInterface({ input: process.stdin })) {
     try {
       text = call(request.params.name, request.params.arguments ?? {});
     } catch (error) {
-      text = error.message;
+      text = error instanceof Error ? error.message : String(error);
       isError = true;
     }
     writeFileSync(usageFile, JSON.stringify(usage));

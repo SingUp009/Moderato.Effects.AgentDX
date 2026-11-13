@@ -1,7 +1,10 @@
 import { spawnSync } from 'node:child_process';
 import { randomUUID } from 'node:crypto';
 
-export function dockerRun(image, script, input, { timeout = 35_000, args = [] } = {}) {
+export function dockerRun(
+  image: string, script: string, input: Buffer,
+  { timeout = 35_000, args = [] }: { timeout?: number; args?: string[] } = {},
+) {
   const docker = process.env.AGENT_DX_DOCKER || 'docker';
   const name = 'moderato-agent-dx-' + randomUUID();
   const result = spawnSync(docker, [

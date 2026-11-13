@@ -22,4 +22,6 @@ jobs:
         with:
           node-version-file: .node-version
           package-manager-cache: false
-      - run: node --test offline.test.mjs live/*.test.mjs
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm test

@@ -5,7 +5,7 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import test from 'node:test';
-import { prepare } from '../run.mjs';
+import { prepare } from '../run.mts';
 
 test('fixture tools allow the selected docs and write only Submission.cs', () => {
   const directory = mkdtempSync(join(tmpdir(), 'agent-dx-fixture-test-'));
@@ -26,7 +26,7 @@ test('fixture tools allow the selected docs and write only Submission.cs', () =>
       ['write_submission', { source: 'new C# source' }],
       ['read_file', { file: 'Submission.cs' }],
     ].map(([name, args], id) => JSON.stringify({ jsonrpc: '2.0', id, method: 'tools/call', params: { name, arguments: args } }));
-    const server = fileURLToPath(new URL('./fixture-mcp.mjs', import.meta.url));
+    const server = fileURLToPath(new URL('./fixture-mcp.mts', import.meta.url));
     const processResult = spawnSync(process.execPath, [server, fixture, 'resources', usage], {
       input: requests.join('\n') + '\n', encoding: 'utf8',
     });

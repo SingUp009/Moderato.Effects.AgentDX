@@ -1,10 +1,12 @@
 import assert from 'node:assert/strict';
+import { spawn } from 'node:child_process';
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import test from 'node:test';
-import { prepare } from '../run.mjs';
-import { initialize, loadInputs, recordRun, summarize } from './experiment.mjs';
+import { prepare } from '../run.mts';
+import { initialize, loadInputs, recordRun, summarize } from './experiment.mts';
+import { validate } from '../report.mts';
 
 test('experiment saves the exact inputs and derives its summary from recorded builds', () => {
   const root = mkdtempSync(join(tmpdir(), 'agent-dx-records-'));
@@ -39,7 +41,7 @@ test('experiment saves the exact inputs and derives its summary from recorded bu
     const repaired = { source: 'Correct source', exitCode: 0, stdout: 'Build succeeded', stderr: '', error: null };
     const run = {
       id: 'example-1', condition: 'example', firstBuildPassed: false, builds: [failed, repaired],
-      grade: { buildSucceeded: true, success: true, testsPassed: 5, testsTotal: 5 },
+      grade: validate(JSON.parse(readFileSync(new URL('../reports/offline-example.json', import.meta.url), 'utf8'))),
       durationMs: 300, usage: { input_tokens: 100, output_tokens: 20 },
     };
     recordRun(directory, run);
@@ -55,6 +57,34 @@ test('experiment saves the exact inputs and derives its summary from recorded bu
     assert.equal(summary.conditions.example.testsPassed, 1);
     assert.equal(summary.conditions.example.medianInputTokens, 100);
     assert.equal(summary.conditions.control.medianInputTokens, null);
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test('parallel trials append one row each and leave a complete summary', async () => {
+  const root = mkdtempSync(join(tmpdir(), 'agent-dx-parallel-'));
+  try {
+    prepare('resources', join(root, 'fixture'));
+    const directory = join(root, 'experiment');
+    const experiment = initialize(directory, {
+      task: 'resources', model: 'test-model', seed: 'parallel', repeats: 4,
+      conditions: { control: 'fixture' },
+    }, root, 'codex-cli test');
+    const module = new URL('./experiment.mts', import.meta.url).href;
+    const script = `import { recordRun } from ${JSON.stringify(module)};
+      recordRun(process.argv[1], { ...JSON.parse(process.argv[2]), firstBuildPassed: null,
+        builds: [], grade: null, usage: null, durationMs: 0 });`;
+    const exits = await Promise.all(experiment.order.map(trial => new Promise<number | null>((done, reject) => {
+      const child = spawn(process.execPath,
+        ['--input-type=module', '-e', script, directory, JSON.stringify(trial)], { stdio: 'inherit' });
+      child.on('error', reject);
+      child.on('close', done);
+    })));
+    assert.deepEqual(exits, [0, 0, 0, 0]);
+    const summary = JSON.parse(readFileSync(join(directory, 'summary.json'), 'utf8'));
+    assert.equal(summary.recordedRuns, 4);
+    assert.equal(readFileSync(join(directory, 'runs.jsonl'), 'utf8').trimEnd().split('\n').length, 4);
   } finally {
     rmSync(root, { recursive: true, force: true });
   }

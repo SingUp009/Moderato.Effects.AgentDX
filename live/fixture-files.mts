@@ -3,8 +3,8 @@ import { join, relative, sep } from 'node:path';
 
 export const starterFiles = ['prompt.md', 'Submission.cs', 'Contract.cs', 'Submission.csproj', 'global.json', 'packages.lock.json'];
 
-export function readFixture(root) {
-  const files = new Map();
+export function readFixture(root: string) {
+  const files = new Map<string, string>();
   for (const name of [...starterFiles, '.agents/skills/moderato-effects/SKILL.md']) {
     const path = join(root, name);
     if (existsSync(path) && lstatSync(path).isFile()) files.set(name, readFileSync(path, 'utf8'));

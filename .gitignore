@@ -1,4 +1,5 @@
 artifacts/
+node_modules/
 bin/
 obj/
 TestResults/

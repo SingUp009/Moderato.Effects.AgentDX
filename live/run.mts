@@ -3,19 +3,29 @@ import { createWriteStream, mkdirSync, readFileSync, writeFileSync } from 'node:
 import { finished } from 'node:stream/promises';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { validate } from '../report.mjs';
-import { graderFiles, revision, taskIds } from '../run.mjs';
-import { codexVersion, loadExperiment, loadInputs, prompt as defaultPrompt, readRuns, recordRun, settings } from './experiment.mjs';
+import { validate } from '../report.mts';
+import type { GradeReport } from '../report.mts';
+import { graderFiles, revision, taskIds } from '../run.mts';
+import { codexVersion, loadExperiment, loadInputs, prompt as defaultPrompt, readRuns, recordRun, settings } from './experiment.mts';
+import type { BuildRecord, TokenUsage } from './experiment.mts';
 
 const argv = process.argv.slice(2);
 const here = dirname(fileURLToPath(import.meta.url));
 
-async function execute({ task, workspace, directory, model, prompt, experimentDirectory, condition }) {
+type Execution = {
+  task: string;
+  workspace: string;
+  directory: string;
+  model: string;
+  prompt: string;
+} & ({ experimentDirectory: string; condition: string } | { experimentDirectory?: undefined; condition?: undefined });
+
+async function execute({ task, workspace, directory, model, prompt, experimentDirectory, condition }: Execution) {
   const usageFile = join(directory, 'tool-usage.json');
-  const config = {
+  const config: Record<string, string | string[] | boolean> = {
     web_search: 'disabled', 'agents.enabled': false, model_reasoning_effort: settings.reasoning, approval_policy: 'never',
     'mcp_servers.fixture.command': process.execPath,
-    'mcp_servers.fixture.args': [join(here, 'fixture-mcp.mjs'), workspace, task, usageFile,
+    'mcp_servers.fixture.args': [join(here, 'fixture-mcp.mts'), workspace, task, usageFile,
       ...(experimentDirectory ? [experimentDirectory, condition] : [])],
     'mcp_servers.fixture.required': true,
   };
@@ -36,7 +46,7 @@ async function execute({ task, workspace, directory, model, prompt, experimentDi
   const child = spawn('codex', args, { cwd: workspace, windowsHide: true });
   child.stdout.pipe(events);
   child.stderr.pipe(stderr);
-  child.stdin.on('error', error => { if (error.code !== 'EPIPE') console.error(error.message); });
+  child.stdin.on('error', (error: NodeJS.ErrnoException) => { if (error.code !== 'EPIPE') console.error(error.message); });
   child.stdin.end(prompt);
   let timedOut = false;
   let spawnError = null;
@@ -45,7 +55,9 @@ async function execute({ task, workspace, directory, model, prompt, experimentDi
     child.kill();
   }, settings.timeoutMs);
   child.on('error', error => { spawnError = error.message; });
-  const [exitCode, signal] = await new Promise(done => child.on('close', (...result) => done(result)));
+  const [exitCode, signal] = await new Promise<[number | null, NodeJS.Signals | null]>(
+    done => child.on('close', (...result) => done(result)),
+  );
   clearTimeout(timer);
   await saved;
   const result = {
@@ -56,8 +68,8 @@ async function execute({ task, workspace, directory, model, prompt, experimentDi
   return result;
 }
 
-function telemetry(directory) {
-  let usage = null;
+function telemetry(directory: string) {
+  let usage: TokenUsage | null = null;
   let toolCalls = 0;
   for (const line of readFileSync(join(directory, 'events.jsonl'), 'utf8').split('\n').filter(Boolean)) {
     try {
@@ -71,16 +83,16 @@ function telemetry(directory) {
   return { usage, toolCalls };
 }
 
-async function runExperiment(directory) {
+async function runExperiment(directory: string, requestedId?: string) {
   const experiment = loadExperiment(directory);
   if (codexVersion() !== experiment.harnessVersion) throw new Error('Codex CLI version differs from experiment');
   if (!taskIds.includes(experiment.task) ||
       revision(join(here, '..', 'graders'), graderFiles(experiment.task)) !== experiment.graderRevision ||
-      Object.entries(settings).some(([key, value]) => experiment[key] !== value)) {
+      (Object.keys(settings) as (keyof typeof settings)[]).some(key => experiment[key] !== settings[key])) {
     throw new Error('Grader files or run limits differ from the experiment');
   }
   const completed = new Set(readRuns(directory).map(run => run.id));
-  const next = experiment.order.find(run => !completed.has(run.id));
+  const next = experiment.order.find(run => !completed.has(run.id) && (!requestedId || requestedId === run.id));
   if (!next) throw new Error('Experiment has no pending runs');
   const { id, condition } = next;
   if (!/^[a-zA-Z0-9][a-zA-Z0-9_-]*$/.test(id)) throw new Error('Invalid run ID');
@@ -99,18 +111,18 @@ async function runExperiment(directory) {
   }
   const { task, model, prompt } = experiment;
   const result = await execute({ task, model, prompt, workspace, directory: trace, experimentDirectory: directory, condition });
-  let builds = [];
+  let builds: BuildRecord[] = [];
   try {
     builds = JSON.parse(readFileSync(join(trace, 'tool-usage.json'), 'utf8')).builds;
   } catch (error) {
-    if (error.code !== 'ENOENT') throw error;
+    if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error;
   }
   const submissionPath = join(workspace, 'Submission.cs');
   const submission = readFileSync(submissionPath, 'utf8');
-  let grade = null;
-  let gradingError = null;
+  let grade: GradeReport | null = null;
+  let gradingError: string | null = null;
   if (submission !== inputs.get('Submission.cs')) {
-    const scored = spawnSync(process.execPath, [join(here, 'grade.mjs'), task, submissionPath], {
+    const scored = spawnSync(process.execPath, [join(here, 'grade.mts'), task, submissionPath], {
       encoding: 'utf8', timeout: 190_000, windowsHide: true,
     });
     writeFileSync(join(trace, 'grade.stderr.log'), scored.stderr ?? '');
@@ -122,7 +134,7 @@ async function runExperiment(directory) {
       }
     } catch (error) {
       grade = null;
-      gradingError = error.message;
+      gradingError = error instanceof Error ? error.message : String(error);
       console.error(gradingError);
     }
   }
@@ -135,12 +147,12 @@ async function runExperiment(directory) {
 }
 
 try {
-  if (argv.length === 3 && argv[0] === 'experiment' && argv[2] === '--live') {
-    process.exitCode = await runExperiment(resolve(argv[1]));
+  if ((argv.length === 3 || argv.length === 4) && argv[0] === 'experiment' && argv[2] === '--live') {
+    process.exitCode = await runExperiment(resolve(argv[1]), argv[3]);
   } else {
     const [task, fixture, output, model, optIn, ...extra] = argv;
     if (!taskIds.includes(task) || !fixture || !output || !model || optIn !== '--live' || extra.length) {
-      throw new Error('Usage: node live/run.mjs experiment EXPERIMENT_DIR --live | TASK FIXTURE NEW_OUTPUT_DIR MODEL --live');
+      throw new Error('Usage: node live/run.mts experiment EXPERIMENT_DIR --live [RUN_ID] | TASK FIXTURE NEW_OUTPUT_DIR MODEL --live');
     }
     const workspace = resolve(fixture);
     const directory = resolve(output);
@@ -152,6 +164,6 @@ try {
     process.exitCode = result.timedOut ? 124 : (result.exitCode ?? 2);
   }
 } catch (error) {
-  console.error(error.message);
+  console.error(error instanceof Error ? error.message : String(error));
   process.exitCode = 2;
 }

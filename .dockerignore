@@ -7,8 +7,8 @@
 !tasks/**
 !solutions/
 !solutions/mutations.json
-!run.mjs
-!report.mjs
+!run.mts
+!report.mts
 !global.json
 !live/
 !live/Dockerfile

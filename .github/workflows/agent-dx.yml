@@ -22,4 +22,4 @@ jobs:
         with:
           node-version-file: .node-version
           package-manager-cache: false
-      - run: node --test offline.test.mjs live/fixture.test.mjs
+      - run: node --test offline.test.mjs live/*.test.mjs

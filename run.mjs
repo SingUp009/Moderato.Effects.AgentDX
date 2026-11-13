@@ -34,12 +34,17 @@ function readText(path) {
   return readFileSync(path, 'utf8').replaceAll('\r\n', '\n');
 }
 
-function revision(directory) {
+function revision(directory, names = readdirSync(directory)) {
   const hash = createHash('sha256');
-  for (const name of readdirSync(directory).sort()) {
+  for (const name of [...names].sort()) {
     hash.update(name + '\0').update(readText(join(directory, name))).update('\0');
   }
   return hash.digest('hex');
+}
+
+function graderFiles(id) {
+  const testName = id.split('-').map(part => part[0].toUpperCase() + part.slice(1)).join('') + 'Tests.cs';
+  return ['Grader.csproj', 'packages.lock.json', testName];
 }
 
 function dotnet(cwd, args) {
@@ -67,8 +72,7 @@ function grade(id, variant, workspaceRoot = tmpdir()) {
     prepare(id, submission);
     const graders = join(workspace, 'graders');
     mkdirSync(graders);
-    const testName = id.split('-').map(part => part[0].toUpperCase() + part.slice(1)).join('') + 'Tests.cs';
-    for (const name of ['Grader.csproj', 'packages.lock.json', testName]) {
+    for (const name of graderFiles(id)) {
       cpSync(join(root, 'graders', name), join(graders, name));
     }
     const fixtureRevision = revision(submission);
@@ -150,7 +154,7 @@ function logFailure(result) {
   process.stderr.write([result.error?.message, result.stdout, result.stderr].filter(Boolean).join('\n') + '\n');
 }
 
-export { grade, prepare, taskIds };
+export { grade, graderFiles, prepare, revision, taskIds };
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const [command, first, second, ...extra] = process.argv.slice(2);

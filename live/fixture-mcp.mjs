@@ -1,29 +1,14 @@
-import { existsSync, lstatSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import { tmpdir } from 'node:os';
-import { join, relative, sep } from 'node:path';
+import { join } from 'node:path';
 import { createInterface } from 'node:readline';
 import { dockerRun } from './docker.mjs';
+import { readFixture, starterFiles } from './fixture-files.mjs';
+import { loadInputs, settings } from './experiment.mjs';
 
-const [root, task, usageFile] = process.argv.slice(2);
-const files = new Map();
-const starterFiles = ['prompt.md', 'Submission.cs', 'Contract.cs', 'Submission.csproj', 'global.json', 'packages.lock.json'];
-const docRoot = join(root, 'docs');
-
-for (const name of [...starterFiles, '.agents/skills/moderato-effects/SKILL.md']) {
-  const path = join(root, name);
-  if (existsSync(path) && lstatSync(path).isFile()) files.set(name, readFileSync(path, 'utf8'));
-}
-if (existsSync(docRoot) && lstatSync(docRoot).isDirectory()) {
-  for (const entry of readdirSync(docRoot, { recursive: true, withFileTypes: true })) {
-    if (!entry.isFile() || !/\.(md|txt)$/.test(entry.name)) continue;
-    const path = join(entry.parentPath, entry.name);
-    files.set(relative(root, path).split(sep).join('/'), readFileSync(path, 'utf8'));
-  }
-}
-if (!starterFiles.filter(name => name !== 'Contract.cs').every(name => files.has(name))) {
-  throw new Error('Expected a prepared fixture');
-}
+const [root, task, usageFile, snapshot, condition] = process.argv.slice(2);
+const files = snapshot ? loadInputs(snapshot, condition) : readFixture(root);
 if (!/^[a-z]+(?:-[a-z]+)*$/.test(task)) throw new Error('Invalid task ID');
 
 const usage = { calls: 0, builds: [] };
@@ -35,7 +20,7 @@ const tools = {
 };
 
 function call(name, args) {
-  if (++usage.calls > 24) throw new Error('Tool budget exhausted');
+  if (++usage.calls > settings.toolLimit) throw new Error('Tool budget exhausted');
   if (!Object.hasOwn(tools, name) || Object.keys(args).some(key => !Object.hasOwn(tools[name][1], key))) {
     throw new Error('Unsupported tool or argument');
   }
@@ -51,7 +36,7 @@ function call(name, args) {
       files.set('Submission.cs', args.source);
       return 'Saved';
     case 'build_submission': {
-      if (usage.builds.length >= 4) throw new Error('Build budget exhausted');
+      if (usage.builds.length >= settings.buildLimit) throw new Error('Build budget exhausted');
       const script = [
         'set -eu',
         'mkdir /tmp/work',
@@ -61,8 +46,15 @@ function call(name, args) {
         'dotnet build -c Release --no-restore --disable-build-servers',
       ].join('; ');
       const result = dockerRun('moderato-agent-dx-fixture:local', script, archive());
-      usage.builds.push(result.status);
-      return [result.error?.message, result.stdout, result.stderr].filter(Boolean).join('\n').slice(0, 12_000);
+      const build = {
+        source: files.get('Submission.cs'),
+        exitCode: result.status,
+        error: result.error?.message ?? null,
+        stdout: result.stdout,
+        stderr: result.stderr,
+      };
+      usage.builds.push(build);
+      return [build.error, build.stdout, build.stderr].filter(Boolean).join('\n').slice(0, 12_000);
     }
     default:
       throw new Error('Tool unavailable');

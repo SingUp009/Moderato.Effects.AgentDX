@@ -67,8 +67,38 @@ node live/grade.mjs resources ../resources-task/Submission.cs
 
 The live runner uses the restricted fixture tools to read task materials and update only `Submission.cs`. Its Docker build tool accepts the source and fixed project files. The model turn has a two-minute limit, at most 24 fixture tool calls, and at most four build attempts. `inputs.json` contains the user prompt and task prompt. The output directory also contains CLI events, build exit codes and run metadata.
 
-## Live experiment design
+## Record an experiment
 
-Compare standard documentation, the added guide, and the guide with Skill using the same task revisions, dependencies, model, harness and execution budget. Give every run a fresh environment. Serve the same documentation snapshot to each condition and expose only the intended guide and Skill for that condition. Record sample sizes, success rates, and uncertainty before interpreting differences. Adoption should record framework choice on neutral prompts. Value should use the same behavior specification across implementations and disclose any mandated library choice.
+Prepare one fixture per condition with `node run.mjs prepare`. Give each fixture the same starter files and put the relevant guide and examples under `docs/`. Condition paths in the configuration are relative to that file. Set `repeats` to the number of runs per condition.
 
-Future work includes randomized repeated runs, wider task coverage, and recording the exact guide and example texts in experiment reports.
+```json
+{
+  "task": "resources",
+  "model": "gpt-6-luna",
+  "seed": "resources-1",
+  "repeats": 3,
+  "conditions": {
+    "control": "fixtures/control",
+    "example": "fixtures/example",
+    "async": "fixtures/async"
+  }
+}
+```
+
+Create the parent directory, then freeze the inputs without calling a model. Each live invocation runs the next pending trial in the recorded order and uses a fresh fixture from the frozen inputs. Run one invocation at a time.
+
+```sh
+mkdir -p artifacts/experiments
+node live/experiment.mjs init config.json artifacts/experiments/resources-1
+node live/run.mjs experiment artifacts/experiments/resources-1 --live
+node live/experiment.mjs summarize artifacts/experiments/resources-1
+```
+
+| File | Contents |
+| --- | --- |
+| `experiment.json` | Exact runner prompt, task prompt and starter files, condition-specific documents with shared text stored once, model and versions, fixture and grader hashes, seed, and shuffled order with one run per condition per block. |
+| `runs.jsonl` | One row per completed attempt, including build snapshots with the submitted C# and diagnostics, final submission, tool calls, available token usage, timing, and final grading result. Missing builds and grades are represented explicitly. |
+| `traces/` | Per-run Codex events, stderr and temporary task fixture retained for inspection. |
+| `summary.json` | Rebuildable counts for first build, final build, grading, and timeouts, plus medians for duration and reported tokens. |
+
+Keep experiment folders under the ignored `artifacts/` directory. Back up the folder as a unit. Review source and raw logs before sharing them. If a run is interrupted before its result row is written, move its trace directory aside before retrying that run ID.

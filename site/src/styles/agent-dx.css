@@ -58,29 +58,18 @@ main:has(.agent-dx) h1#_top {
     grid-template-columns: minmax(0, 1.3fr) minmax(16rem, 0.85fr);
     align-items: center;
     gap: clamp(1.5rem, 5vw, 4.5rem);
-    padding: clamp(1.5rem, 4.6vw, 4rem);
-    background: var(--dx-tint);
-    border: 1px solid var(--dx-stroke);
-    border-radius: 1.1rem;
+    padding-block: clamp(1rem, 3vw, 2.5rem);
 }
 
 .dx-lead { min-width: 0; }
 .dx-hero h2 {
-    margin-block: 0.65rem 1rem;
+    margin-bottom: 1rem;
     max-width: 21ch;
     overflow-wrap: anywhere;
     font-size: clamp(2.3rem, 5vw, 4rem);
     font-weight: 720;
     letter-spacing: -0.055em;
     line-height: 1.02;
-}
-
-.dx-kicker {
-    color: var(--dx-accent);
-    font-family: var(--sl-font-mono);
-    font-size: 0.75rem;
-    font-weight: 700;
-    letter-spacing: 0.08em;
 }
 
 .dx-deck, .dx-section-heading p, .dx-chart-heading p, .dx-chart-note, .dx-findings p,
@@ -92,7 +81,7 @@ main:has(.agent-dx) h1#_top {
 .dx-deck strong { color: var(--dx-ink); }
 .dx-takeaway { max-width: 61ch; color: var(--dx-ink); font-size: 0.94rem; margin-top: 1rem !important; }
 .dx-outcome { padding: clamp(1.1rem, 2.5vw, 1.6rem); border: 1px solid var(--dx-stroke); border-radius: 0.8rem; background: var(--dx-surface); }
-.dx-outcome-item { margin-top: 1.25rem; }
+.dx-outcome-item + .dx-outcome-item { margin-top: 1.25rem; }
 .dx-outcome-label { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; font-size: 0.88rem; }
 .dx-outcome-label strong { font-size: 1.55rem; line-height: 1.2; font-variant-numeric: tabular-nums; }
 .dx-outcome .dx-track { height: 0.85rem; margin-top: 0.5rem; }
@@ -118,7 +107,7 @@ main:has(.agent-dx) h1#_top {
 .dx-download { white-space: nowrap; font-size: 0.9rem; }
 .dx-chart { border: 1px solid var(--dx-stroke); border-radius: 0.85rem; background: var(--dx-surface); }
 .dx-experiments { display: flex; flex-wrap: wrap; border-bottom: 1px solid var(--dx-stroke); border-radius: 0.85rem 0.85rem 0 0; background: var(--dx-tint); padding: 0.5rem; gap: 0.35rem; }
-.dx-experiments button { padding: 0.52rem 0.85rem; color: var(--dx-muted); border: 1px solid transparent; border-radius: 0.45rem; background: transparent; font: inherit; font-size: 0.86rem; font-weight: 680; cursor: pointer; }
+.dx-experiments button { margin: 0; padding: 0.52rem 0.85rem; color: var(--dx-muted); border: 1px solid transparent; border-radius: 0.45rem; background: transparent; font: inherit; font-size: 0.86rem; font-weight: 680; cursor: pointer; }
 .dx-experiments button:hover { color: var(--dx-accent); }
 .dx-experiments button[aria-pressed='true'] { background: var(--dx-surface); color: var(--dx-accent); border-color: var(--dx-stroke); }
 .dx-chart-heading, .dx-panels { padding: 1.35rem clamp(1rem, 3vw, 1.7rem) 0; }
@@ -128,7 +117,7 @@ main:has(.agent-dx) h1#_top {
 .dx-controls label { display: grid; gap: 0.2rem; color: var(--dx-muted); font-size: 0.75rem; font-weight: 650; }
 .dx-controls select { padding: 0.42rem 0.52rem; color: var(--dx-ink); background: var(--dx-surface); border: 1px solid var(--dx-stroke); border-radius: 0.35rem; min-height: 2.15rem; font: inherit; font-size: 0.84rem; }
 .dx-panels { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr)); gap: 1rem; }
-.dx-panel { min-width: 0; padding: 1rem; background: var(--dx-tint); border-radius: 0.55rem; }
+.dx-panel { min-width: 0; margin: 0; padding: 1rem; background: var(--dx-tint); border-radius: 0.55rem; }
 .dx-panel h4 { font-size: 0.95rem; margin-bottom: 0.6rem; }
 .dx-panel ul { padding: 0; list-style: none; }
 .dx-panel li { margin: 0.5rem 0 0; }
@@ -149,18 +138,17 @@ main:has(.agent-dx) h1#_top {
 
 .dx-findings { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr)); gap: 0.8rem; }
 .dx-findings article, .dx-snapshot { padding: 1.25rem; background: var(--dx-surface); border: 1px solid var(--dx-stroke); border-radius: 0.65rem; }
+.dx-findings > article { display: grid; grid-template-rows: auto 1fr auto; justify-items: start; margin: 0; }
 .dx-findings p, .dx-method p { margin-block: 0.6rem 0; font-size: 0.93rem; }
 .dx-findings a { display: inline-block; margin-top: 0.85rem; font-size: 0.88rem; }
 .dx-method { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 1rem 2rem; align-items: start; }
 .dx-snapshot code { display: inline-block; max-width: 100%; overflow-wrap: anywhere; font-size: 0.75rem; }
 .dx-snapshot a { display: inline-block; margin-top: 0.65rem; font-size: 0.88rem; }
-.dx-holdout { padding: clamp(1.35rem, 3.4vw, 2.2rem); border-radius: 0.8rem; background: var(--dx-tint); border: 1px solid var(--dx-stroke); }
-.dx-holdout .dx-kicker { color: var(--dx-accent); }
-.dx-holdout h2 { margin-block: 0.55rem; }
+.dx-holdout h2 { margin-bottom: 0.55rem; }
 .dx-holdout p { max-width: 65ch; }
 .dx-holdout p + p, .dx-holdout p:last-child { margin-top: 0.65rem; }
 .dx-holdout-models { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr)); gap: 0.8rem; margin: 1rem 0; }
-.dx-holdout-models > div { padding: 1rem; border: 1px solid var(--dx-stroke); border-radius: 0.55rem; background: var(--dx-surface); }
+.dx-holdout-models > div { margin: 0; padding: 1rem; border: 1px solid var(--dx-stroke); border-radius: 0.55rem; background: var(--dx-surface); }
 .dx-holdout-models dl { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.3rem; margin-top: 0.6rem; }
 .agent-dx .dx-holdout-models dl > div, .agent-dx .dx-holdout-models dd { margin: 0; }
 .dx-holdout-models dt { font-size: 0.8rem; color: var(--dx-muted); }
@@ -285,9 +273,10 @@ main:has(.agent-dx) h1#_top {
 
 /* Evaluation flow, distinct from the detailed methodology below. */
 .dx-evaluation-flow {
+    --dx-flow-gap: 1.5rem;
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 1rem;
+    gap: var(--dx-flow-gap);
     margin: 0;
     padding: 0;
     list-style: none;
@@ -304,11 +293,14 @@ main:has(.agent-dx) h1#_top {
 .dx-evaluation-flow li:not(:last-child)::after {
     content: '→';
     position: absolute;
-    top: 1.15rem;
-    right: -0.85rem;
-    z-index: 1;
+    inset-block-start: 50%;
+    inset-inline-start: calc(100% + 1px);
+    inline-size: var(--dx-flow-gap);
+    translate: 0 -50%;
+    text-align: center;
     color: var(--dx-accent);
     font-size: 1.3rem;
+    line-height: 1;
 }
 .dx-flow-number {
     display: inline-block;
@@ -322,7 +314,7 @@ main:has(.agent-dx) h1#_top {
 
 @media (max-width: 63rem) {
     .dx-task-head, .dx-task-row { grid-template-columns: minmax(8rem, 1fr) repeat(2, minmax(0, 1.1fr)); }
-    .dx-evaluation-flow { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .dx-evaluation-flow { --dx-flow-gap: 1rem; grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .dx-evaluation-flow li::after { display: none; }
 }
 @media (max-width: 41rem) {

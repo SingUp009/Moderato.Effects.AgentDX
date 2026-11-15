@@ -21,7 +21,6 @@ const perVersion = holdout.rows.filter(row => row.condition === 'frozen')
 <div class="agent-dx">
     <section class="dx-hero" aria-labelledby="research-question">
         <div class="dx-lead">
-            <p class="dx-kicker">AGENT DX · RESEARCH RESULTS</p>
             <h2 id="research-question">Can coding agents write correct C# effects?</h2>
             <p class="dx-deck">In our evaluation, coding agents using Moderato.Effects and its improved documentation wrote code that passed <strong>every hidden behavioral test in {improved} of {perVersion} attempts</strong>. With the earlier documentation, <strong>{original} of {perVersion}</strong> attempts passed.</p>
             <p class="dx-takeaway">The improvement was observed in a parallel replica-reading task involving cancellation and resource cleanup. Both documentation versions passed every trial in the other two tasks.</p>
@@ -31,7 +30,6 @@ const perVersion = holdout.rows.filter(row => row.condition === 'frozen')
             </div>
         </div>
         <div class="dx-outcome" aria-label="Coding-agent implementation correctness comparison">
-            <p class="dx-kicker">CORRECT IMPLEMENTATIONS</p>
             <div class="dx-outcome-item" data-condition="baseline">
                 <div class="dx-outcome-label"><span>Original documentation</span><strong>{original}/{perVersion}</strong></div>
                 <div class="dx-track" aria-hidden="true"><div class="dx-bar" style={{ width: 100 * original / perVersion + '%' }}></div></div>

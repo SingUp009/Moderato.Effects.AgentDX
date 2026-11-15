@@ -2,6 +2,8 @@
 
 This is the offline Proficiency suite. The grader verifies public behavior against a published Moderato.Effects package. It exercises five tasks and ships one reference implementation and one deliberately incorrect, compiling implementation per task.
 
+The [research site](site/) presents the documentation evaluation, model comparisons, and downloadable results.
+
 ## Run locally
 
 Use Node.js 22 or later and .NET SDK 11.0.100. NuGet restores the locked packages on first use. Set `AGENT_DX_NUGET_SOURCES` to local feed directories separated by the platform's path delimiter if packages are available offline. The suite verifies NuGet content hashes in locked mode.

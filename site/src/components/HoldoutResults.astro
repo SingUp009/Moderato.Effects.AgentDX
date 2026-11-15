@@ -1,0 +1,134 @@
+---
+import raw from '../data/holdout-results.json';
+import report from '../data/agent-dx.json';
+
+type Row = {
+    task: string; model: string; condition: string; planned: number;
+    firstBuild: number; firstBuildObserved: number; finalPass: number; finalWilson95: [number, number];
+    timelyPass: number; timeouts: number; missing: number; failedBuilds: number;
+    buildToolErrors: number; gradingErrors: number; harnessErrors: number;
+    medianDurationMs: number;
+};
+type Summary = {
+    planned: number;
+    observed: number;
+    frozenSha256: string;
+    baselineSha256: string;
+    positiveSignal: boolean;
+    models: { model: string; baseline: number; frozen: number; mixedBaseline: number; mixedFrozen: number }[];
+    rows: Row[];
+    replicaComposition: { model: string; baseline: number; frozen: number; perGuide: number }[];
+};
+
+const results = raw as Summary | null;
+const modelNames: Record<string, string> = {
+    'gpt-6-luna': 'GPT-6 Luna',
+    'claude-haiku-4-5-20251001': 'Claude Haiku 4.5',
+};
+const taskNames: Record<string, string> = {
+    'replica-read': 'Replica read',
+    'catalog-fallback': 'Catalog fallback',
+    'bounded-validation': 'Bounded validation',
+};
+const pct = (value: number) => `${(100 * value).toFixed(0)}%`;
+const interval = (row: Row) => row.finalWilson95.map(pct).join('–');
+const pairs = results?.rows.filter(row => row.condition === 'baseline').map(baseline => ({
+    baseline,
+    frozen: results.rows.find(row => row.model === baseline.model && row.task === baseline.task && row.condition === 'frozen')!,
+})) ?? [];
+
+if (results && (results.planned !== results.observed ||
+    results.frozenSha256 !== report.guide.sha256 ||
+    results.baselineSha256 !== report.guide.baselineSha256 ||
+    pairs.some(pair => !pair.frozen))) {
+    throw new Error('Holdout result does not match the registered guide comparison.');
+}
+---
+
+<section class="dx-holdout" id="holdout" aria-labelledby="holdout-heading">
+    <p class="dx-kicker">{results ? 'RESULTS BY MODEL AND TASK' : 'EVALUATION IN PROGRESS'}</p>
+    <h2 id="holdout-heading">How did each coding agent perform?</h2>
+    {results ? (
+        <>
+            <p>{results.positiveSignal
+                ? 'Both models produced more fully correct implementations with the improved documentation. The gains were concentrated in Replica read.'
+                : 'The study checked whether improvements to the documentation changed coding-agent correctness on tasks not used during guide development.'}</p>
+            <p>Each result is the number of submissions passing every hidden test. The table also shows 95% Wilson intervals, which reflect uncertainty from the small sample.</p>
+            <div class="dx-holdout-models">
+                {results.models.map(model => {
+                    const total = results.rows.filter(row => row.model === model.model && row.condition === 'frozen')
+                        .reduce((sum, row) => sum + row.planned, 0);
+                    return (
+                        <div>
+                            <h3>{modelNames[model.model]}</h3>
+                            <dl>
+                                <div data-condition="baseline">
+                                    <dt>Original</dt>
+                                    <dd>
+                                        {model.baseline}/{total}
+                                        <div class="dx-track" aria-hidden="true"><div class="dx-bar" style={{ width: 100 * model.baseline / total + '%' }}></div></div>
+                                    </dd>
+                                </div>
+                                <div data-condition="frozen">
+                                    <dt>Improved</dt>
+                                    <dd>
+                                        {model.frozen}/{total}
+                                        <div class="dx-track" aria-hidden="true"><div class="dx-bar" style={{ width: 100 * model.frozen / total + '%' }}></div></div>
+                                    </dd>
+                                </div>
+                            </dl>
+                        </div>
+                    );
+                })}
+            </div>
+            <div class="dx-scroll">
+                <table>
+                    <thead><tr>
+                        <th scope="col">Task</th><th scope="col">Model</th>
+                        <th scope="col">Original documentation</th><th scope="col">Improved documentation</th>
+                    </tr></thead>
+                    <tbody>
+                        {pairs.map(({ baseline, frozen }) => (
+                            <tr>
+                                <th scope="row">{taskNames[baseline.task]}</th><td>{modelNames[baseline.model]}</td>
+                                <td>{baseline.finalPass}/{baseline.planned} · {interval(baseline)}</td>
+                                <td>{frozen.finalPass}/{frozen.planned} · {interval(frozen)}</td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+            <p>Both models improved on Replica read. In Catalog fallback and Bounded validation, every submission passed with both documentation versions.</p>
+            <p>On Replica read, submitted code used <code>Effect.Race</code> together with <code>Resource.Make</code> in
+                {results.replicaComposition.map(row => ` ${row.baseline}/${row.perGuide} → ${row.frozen}/${row.perGuide} (${modelNames[row.model]})`).join(' and')}
+                runs. The study compared the complete documentation versions, so this change cannot be attributed to one individual example or instruction.</p>
+            <details class="dx-table">
+                <summary>Build results, timing, and incomplete submissions</summary>
+                <div class="dx-scroll">
+                    <table>
+                        <thead><tr>
+                            <th scope="col">Task</th><th scope="col">Model</th><th scope="col">Guide</th>
+                            <th scope="col">First build</th><th scope="col">Timely pass</th>
+                            <th scope="col">Median time</th><th scope="col">Timed out</th><th scope="col">No submission</th>
+                        </tr></thead>
+                        <tbody>
+                            {results.rows.map(row => (
+                                <tr>
+                                    <th scope="row">{taskNames[row.task]}</th><td>{modelNames[row.model]}</td>
+                                    <td>{row.condition === 'baseline' ? 'Original' : 'Improved'}</td>
+                                    <td>{row.firstBuild}/{row.firstBuildObserved} observed</td>
+                                    <td>{row.timelyPass}/{row.planned}</td>
+                                    <td>{(row.medianDurationMs / 1_000).toFixed(1)} s</td>
+                                    <td>{row.timeouts}</td><td>{row.missing}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            </details>
+            <p><a href="/agent-dx/results.json" download>Download the full results JSON</a></p>
+        </>
+    ) : (
+        <p>The evaluation will compare the original and improved documentation on previously unused tasks, with the same task prompts, package, time limit, and hidden tests for each condition.</p>
+    )}
+</section>

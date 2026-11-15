@@ -1,0 +1,155 @@
+{
+  "schemaVersion": 1,
+  "guide": {
+    "fileCount": 30,
+    "sha256": "679a95d36d2d645ad5800aadf106d85a3128f48dd0aa1641b594c13a2a8e2c2f",
+    "baselineSha256": "f6061898ef15862a3218f2e80b2a1f3e6bdaa1da8aea1ea8fec15a5e5342be85",
+    "packageVersion": "0.1.0-preview.6",
+    "frozenAt": "2026-11-14T22:36:11.805Z"
+  },
+  "experiments": [
+    {
+      "id": "resource-guidance",
+      "label": "Examples & principles",
+      "title": "What should the guide explain?",
+      "description": "Three Resource tasks tested concrete examples, ownership and release rules, and the combination. Each model attempted each condition twice per task.",
+      "deadlineSeconds": 120,
+      "taskCount": 3,
+      "rows": [
+        {
+          "model": "GPT-6 Luna",
+          "condition": "control",
+          "planned": 6,
+          "firstBuild": 0,
+          "finalPass": 3,
+          "label": "Standard guide"
+        },
+        {
+          "model": "GPT-6 Luna",
+          "condition": "async",
+          "planned": 6,
+          "firstBuild": 4,
+          "finalPass": 2,
+          "label": "Async example"
+        },
+        {
+          "model": "GPT-6 Luna",
+          "condition": "principles",
+          "planned": 6,
+          "firstBuild": 0,
+          "finalPass": 2,
+          "label": "Principles"
+        },
+        {
+          "model": "GPT-6 Luna",
+          "condition": "combined",
+          "planned": 6,
+          "firstBuild": 4,
+          "finalPass": 4,
+          "label": "Async example + principles"
+        },
+        {
+          "model": "Claude Haiku 4.5",
+          "condition": "control",
+          "planned": 6,
+          "firstBuild": 0,
+          "finalPass": 3,
+          "label": "Standard guide"
+        },
+        {
+          "model": "Claude Haiku 4.5",
+          "condition": "async",
+          "planned": 6,
+          "firstBuild": 4,
+          "finalPass": 5,
+          "label": "Async example"
+        },
+        {
+          "model": "Claude Haiku 4.5",
+          "condition": "principles",
+          "planned": 6,
+          "firstBuild": 0,
+          "finalPass": 4,
+          "label": "Principles"
+        },
+        {
+          "model": "Claude Haiku 4.5",
+          "condition": "combined",
+          "planned": 6,
+          "firstBuild": 4,
+          "finalPass": 6,
+          "label": "Async example + principles"
+        }
+      ]
+    },
+    {
+      "id": "first-build",
+      "label": "First-build accuracy",
+      "title": "Can the agent use the API on the first build?",
+      "description": "One Resource task tested a standard guide against synchronous and asynchronous examples with 20 runs per condition.",
+      "deadlineSeconds": 120,
+      "taskCount": 1,
+      "rows": [
+        {
+          "model": "GPT-6 Luna",
+          "condition": "control",
+          "planned": 20,
+          "firstBuild": 6,
+          "finalPass": 17,
+          "label": "Standard guide"
+        },
+        {
+          "model": "GPT-6 Luna",
+          "condition": "example",
+          "planned": 20,
+          "firstBuild": 9,
+          "finalPass": 20,
+          "label": "Synchronous example"
+        },
+        {
+          "model": "GPT-6 Luna",
+          "condition": "async",
+          "planned": 20,
+          "firstBuild": 20,
+          "finalPass": 20,
+          "label": "Async example"
+        }
+      ]
+    },
+    {
+      "id": "frozen-confirmation",
+      "label": "Parallel cleanup",
+      "title": "Can agents compose parallel work and resource cleanup?",
+      "description": "The revised documentation was checked on a development task requiring correct parallel execution, cancellation, and resource release. This task informed the final documentation before evaluation.",
+      "deadlineSeconds": 240,
+      "taskCount": 1,
+      "rows": [
+        {
+          "model": "GPT-6 Luna",
+          "condition": "frozen",
+          "planned": 2,
+          "firstBuild": 2,
+          "finalPass": 2,
+          "label": "Improved documentation"
+        },
+        {
+          "model": "Claude Haiku 4.5",
+          "condition": "frozen",
+          "planned": 2,
+          "firstBuild": 2,
+          "finalPass": 1,
+          "label": "Improved documentation"
+        }
+      ]
+    }
+  ],
+  "holdout": {
+    "status": "pending",
+    "taskCount": 3
+  },
+  "sourceRecords": [
+    "resource-principles/comparison.json",
+    "resources-repeat/summary.json",
+    "concurrency-development/acquisition-factory/comparison.json"
+  ]
+}

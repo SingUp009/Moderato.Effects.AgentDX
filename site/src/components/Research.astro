@@ -1,0 +1,118 @@
+---
+import AgentDxChart from './AgentDxChart';
+import HoldoutResults from './HoldoutResults.astro';
+import holdout from '../data/holdout-results.json';
+import report from '../data/agent-dx.json';
+import '../styles/agent-dx.css';
+
+const docsOrigin = import.meta.env.PUBLIC_DOCS_ORIGIN ?? 'https://moderato-effects.009singup.workers.dev';
+const date = new Intl.DateTimeFormat('en', { dateStyle: 'long', timeZone: 'Asia/Tokyo' }).format(new Date(report.guide.frozenAt));
+const original = holdout.rows.filter(row => row.condition === 'baseline')
+    .reduce((total, row) => total + row.finalPass, 0);
+const improved = holdout.rows.filter(row => row.condition === 'frozen')
+    .reduce((total, row) => total + row.finalPass, 0);
+const perVersion = holdout.rows.filter(row => row.condition === 'frozen')
+    .reduce((total, row) => total + row.planned, 0);
+---
+
+<div class="agent-dx">
+    <section class="dx-hero" aria-labelledby="research-question">
+        <div class="dx-lead">
+            <p class="dx-kicker">AGENT DX · RESEARCH RESULTS</p>
+            <h2 id="research-question">Can coding agents write correct C# effects?</h2>
+            <p class="dx-deck">In our evaluation, coding agents using Moderato.Effects and its improved documentation wrote code that passed <strong>every hidden behavioral test in {improved} of {perVersion} attempts</strong>. With the earlier documentation, <strong>{original} of {perVersion}</strong> attempts passed.</p>
+            <p class="dx-takeaway">The improvement was observed in a parallel replica-reading task involving cancellation and resource cleanup. Both documentation versions passed every trial in the other two tasks.</p>
+            <div class="dx-actions">
+                <a class="dx-primary" href="#holdout">Explore results by model and task</a>
+                <a class="dx-secondary" href={new URL("/agents/", docsOrigin).href}>Use Moderato.Effects with an agent →</a>
+            </div>
+        </div>
+        <div class="dx-outcome" aria-label="Coding-agent implementation correctness comparison">
+            <p class="dx-kicker">CORRECT IMPLEMENTATIONS</p>
+            <div class="dx-outcome-item" data-condition="baseline">
+                <div class="dx-outcome-label"><span>Original documentation</span><strong>{original}/{perVersion}</strong></div>
+                <div class="dx-track" aria-hidden="true"><div class="dx-bar" style={{ width: 100 * original / perVersion + '%' }}></div></div>
+            </div>
+            <div class="dx-outcome-item" data-condition="frozen">
+                <div class="dx-outcome-label"><span>Improved documentation</span><strong>{improved}/{perVersion}</strong></div>
+                <div class="dx-track" aria-hidden="true"><div class="dx-bar" style={{ width: 100 * improved / perVersion + '%' }}></div></div>
+            </div>
+            <p class="dx-outcome-note">2 models · 3 tasks reserved for evaluation · {holdout.observed} attempts across both documentation versions</p>
+            <p class="dx-outcome-note">Results are specific to the tested models, tasks, and package version—not a general success rate or proof of any single documentation feature.</p>
+        </div>
+    </section>
+
+    {holdout && <HoldoutResults />}
+
+    <section class="dx-section" aria-labelledby="findings-heading">
+        <header class="dx-section-heading">
+            <div><h2 id="findings-heading">What the development experiments taught us</h2></div>
+        </header>
+        <div class="dx-findings">
+            <article>
+                <h3>Show a compilable API path</h3>
+                <p>On the single-lease task, Luna’s first builds passed in 6/20 runs with the standard guide and 20/20 with the async example.</p>
+                <a href={new URL("/agent-guide/#manage-a-resource-with-asynchronous-cleanup", docsOrigin).href}>Read the working example</a>
+            </article>
+            <article>
+                <h3>Explain which scope owns cleanup</h3>
+                <p>Across three Resource tasks, the async example plus principles scored 10/12. The async example alone scored 7/12. The sample is small and the results varied by model.</p>
+                <a href={new URL("/resources/#release-rules", docsOrigin).href}>Read the release rules</a>
+            </article>
+            <article>
+                <h3>Check behavior after a build</h3>
+                <p>A submission passed all five initial tests and still leaked a lease when cancellation arrived during acquisition. The final guide shows where to put the acquisition callback and when to give a child its own scope.</p>
+                <a href={new URL("/agent-guide/#manage-a-resource-with-asynchronous-cleanup", docsOrigin).href}>See the ownership pattern</a>
+            </article>
+        </div>
+    </section>
+
+    <section class="dx-section" id="results" aria-labelledby="results-heading">
+        <header class="dx-section-heading">
+            <div>
+                <h2 id="results-heading">Explore the development experiments</h2>
+                <p>These experiments shaped the guide. Choose an experiment to see the counts for each model.</p>
+            </div>
+            <a class="dx-download" href="/agent-dx/results.json" download>Download results JSON <span aria-hidden="true">↗</span></a>
+        </header>
+        <AgentDxChart experiments={report.experiments} client:visible />
+        <details class="dx-table">
+            <summary>View all counts as a table</summary>
+            <div class="dx-scroll">
+                <table>
+                    <thead><tr>
+                        <th scope="col">Experiment</th><th scope="col">Model</th><th scope="col">Condition</th>
+                        <th scope="col">First build</th><th scope="col">All tests</th>
+                    </tr></thead>
+                    <tbody>
+                        {report.experiments.flatMap(experiment => experiment.rows.map(row => (
+                            <tr>
+                                <td>{experiment.label}</td><td>{row.model}</td><td>{row.label}</td>
+                                <td>{row.firstBuild}/{row.planned}</td><td>{row.finalPass}/{row.planned}</td>
+                            </tr>
+                        )))}
+                    </tbody>
+                </table>
+            </div>
+        </details>
+    </section>
+
+    <section class="dx-section dx-method" id="methods" aria-labelledby="methods-heading">
+        <div>
+            <h2 id="methods-heading">How we measured</h2>
+            <p>Agents read a fixed guide snapshot and edit a C# submission in an isolated fixture. They receive build diagnostics. A separate grader then checks the last saved file with hidden behavioral tests.</p>
+            <p>First-build passes count the first build of a changed implementation. Final passes require every hidden test. Missing submissions count in the denominator. Timing excludes grading.</p>
+            <p>The harness and analysis were inspired by <a href="https://agent-dx.hono.dev/">Hono Agent DX</a>.</p>
+        </div>
+        <div class="dx-snapshot">
+            <h3>Documentation versions</h3>
+            <p>Versions were fixed before evaluation, with SHA-256 hashes retained for reproducibility.</p>
+            <p>{date} · Moderato.Effects {report.guide.packageVersion}</p>
+            <p><code>{report.guide.sha256}</code></p>
+            <a href="/agent-dx/guide-snapshots.zip" download>Download both guide snapshots and hashes <span aria-hidden="true">↓</span></a>
+            <a href="https://github.com/SingUp009/Moderato.Effects.AgentDX">View the benchmark repository <span aria-hidden="true">↗</span></a>
+        </div>
+    </section>
+
+    {!holdout && <HoldoutResults />}
+</div>

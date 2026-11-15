@@ -1,0 +1,633 @@
+{
+  "planned": 60,
+  "observed": 60,
+  "baselineSha256": "f6061898ef15862a3218f2e80b2a1f3e6bdaa1da8aea1ea8fec15a5e5342be85",
+  "frozenSha256": "679a95d36d2d645ad5800aadf106d85a3128f48dd0aa1641b594c13a2a8e2c2f",
+  "positiveSignal": true,
+  "models": [
+    {
+      "model": "gpt-6-luna",
+      "baseline": 13,
+      "frozen": 15,
+      "mixedBaseline": 3,
+      "mixedFrozen": 5
+    },
+    {
+      "model": "claude-haiku-4-5-20251001",
+      "baseline": 12,
+      "frozen": 14,
+      "mixedBaseline": 2,
+      "mixedFrozen": 4
+    }
+  ],
+  "rows": [
+    {
+      "task": "replica-read",
+      "model": "gpt-6-luna",
+      "condition": "baseline",
+      "planned": 5,
+      "observed": 5,
+      "firstBuild": 2,
+      "firstBuildObserved": 5,
+      "finalPass": 3,
+      "finalWilson95": [
+        0.2307242812760128,
+        0.882379225767352
+      ],
+      "timelyPass": 3,
+      "medianDurationMs": 37547,
+      "timeouts": 0,
+      "missing": 0,
+      "failedBuilds": 4,
+      "buildToolErrors": 0,
+      "gradingErrors": 0,
+      "harnessErrors": 0
+    },
+    {
+      "task": "replica-read",
+      "model": "gpt-6-luna",
+      "condition": "frozen",
+      "planned": 5,
+      "observed": 5,
+      "firstBuild": 4,
+      "firstBuildObserved": 5,
+      "finalPass": 5,
+      "finalWilson95": [
+        0.5655175352168251,
+        1
+      ],
+      "timelyPass": 5,
+      "medianDurationMs": 24244,
+      "timeouts": 0,
+      "missing": 0,
+      "failedBuilds": 2,
+      "buildToolErrors": 0,
+      "gradingErrors": 0,
+      "harnessErrors": 0
+    },
+    {
+      "task": "replica-read",
+      "model": "claude-haiku-4-5-20251001",
+      "condition": "baseline",
+      "planned": 5,
+      "observed": 5,
+      "firstBuild": 2,
+      "firstBuildObserved": 5,
+      "finalPass": 2,
+      "finalWilson95": [
+        0.11762077423264783,
+        0.769275718723987
+      ],
+      "timelyPass": 2,
+      "medianDurationMs": 187114,
+      "timeouts": 1,
+      "missing": 0,
+      "failedBuilds": 10,
+      "buildToolErrors": 0,
+      "gradingErrors": 0,
+      "harnessErrors": 1
+    },
+    {
+      "task": "replica-read",
+      "model": "claude-haiku-4-5-20251001",
+      "condition": "frozen",
+      "planned": 5,
+      "observed": 5,
+      "firstBuild": 1,
+      "firstBuildObserved": 5,
+      "finalPass": 4,
+      "finalWilson95": [
+        0.37553462976252533,
+        0.9637758913675698
+      ],
+      "timelyPass": 4,
+      "medianDurationMs": 97094,
+      "timeouts": 0,
+      "missing": 0,
+      "failedBuilds": 4,
+      "buildToolErrors": 0,
+      "gradingErrors": 0,
+      "harnessErrors": 0
+    },
+    {
+      "task": "catalog-fallback",
+      "model": "gpt-6-luna",
+      "condition": "baseline",
+      "planned": 5,
+      "observed": 5,
+      "firstBuild": 2,
+      "firstBuildObserved": 5,
+      "finalPass": 5,
+      "finalWilson95": [
+        0.5655175352168251,
+        1
+      ],
+      "timelyPass": 5,
+      "medianDurationMs": 30548,
+      "timeouts": 0,
+      "missing": 0,
+      "failedBuilds": 4,
+      "buildToolErrors": 0,
+      "gradingErrors": 0,
+      "harnessErrors": 0
+    },
+    {
+      "task": "catalog-fallback",
+      "model": "gpt-6-luna",
+      "condition": "frozen",
+      "planned": 5,
+      "observed": 5,
+      "firstBuild": 4,
+      "firstBuildObserved": 5,
+      "finalPass": 5,
+      "finalWilson95": [
+        0.5655175352168251,
+        1
+      ],
+      "timelyPass": 5,
+      "medianDurationMs": 22007,
+      "timeouts": 0,
+      "missing": 0,
+      "failedBuilds": 1,
+      "buildToolErrors": 0,
+      "gradingErrors": 0,
+      "harnessErrors": 0
+    },
+    {
+      "task": "catalog-fallback",
+      "model": "claude-haiku-4-5-20251001",
+      "condition": "baseline",
+      "planned": 5,
+      "observed": 5,
+      "firstBuild": 1,
+      "firstBuildObserved": 5,
+      "finalPass": 5,
+      "finalWilson95": [
+        0.5655175352168251,
+        1
+      ],
+      "timelyPass": 5,
+      "medianDurationMs": 56190,
+      "timeouts": 0,
+      "missing": 0,
+      "failedBuilds": 5,
+      "buildToolErrors": 0,
+      "gradingErrors": 0,
+      "harnessErrors": 0
+    },
+    {
+      "task": "catalog-fallback",
+      "model": "claude-haiku-4-5-20251001",
+      "condition": "frozen",
+      "planned": 5,
+      "observed": 5,
+      "firstBuild": 1,
+      "firstBuildObserved": 5,
+      "finalPass": 5,
+      "finalWilson95": [
+        0.5655175352168251,
+        1
+      ],
+      "timelyPass": 5,
+      "medianDurationMs": 58707,
+      "timeouts": 0,
+      "missing": 0,
+      "failedBuilds": 7,
+      "buildToolErrors": 0,
+      "gradingErrors": 0,
+      "harnessErrors": 0
+    },
+    {
+      "task": "bounded-validation",
+      "model": "gpt-6-luna",
+      "condition": "baseline",
+      "planned": 5,
+      "observed": 5,
+      "firstBuild": 5,
+      "firstBuildObserved": 5,
+      "finalPass": 5,
+      "finalWilson95": [
+        0.5655175352168251,
+        1
+      ],
+      "timelyPass": 5,
+      "medianDurationMs": 21363,
+      "timeouts": 0,
+      "missing": 0,
+      "failedBuilds": 0,
+      "buildToolErrors": 0,
+      "gradingErrors": 0,
+      "harnessErrors": 0
+    },
+    {
+      "task": "bounded-validation",
+      "model": "gpt-6-luna",
+      "condition": "frozen",
+      "planned": 5,
+      "observed": 5,
+      "firstBuild": 4,
+      "firstBuildObserved": 5,
+      "finalPass": 5,
+      "finalWilson95": [
+        0.5655175352168251,
+        1
+      ],
+      "timelyPass": 5,
+      "medianDurationMs": 24518,
+      "timeouts": 0,
+      "missing": 0,
+      "failedBuilds": 1,
+      "buildToolErrors": 0,
+      "gradingErrors": 0,
+      "harnessErrors": 0
+    },
+    {
+      "task": "bounded-validation",
+      "model": "claude-haiku-4-5-20251001",
+      "condition": "baseline",
+      "planned": 5,
+      "observed": 5,
+      "firstBuild": 5,
+      "firstBuildObserved": 5,
+      "finalPass": 5,
+      "finalWilson95": [
+        0.5655175352168251,
+        1
+      ],
+      "timelyPass": 5,
+      "medianDurationMs": 26811,
+      "timeouts": 0,
+      "missing": 0,
+      "failedBuilds": 0,
+      "buildToolErrors": 0,
+      "gradingErrors": 0,
+      "harnessErrors": 0
+    },
+    {
+      "task": "bounded-validation",
+      "model": "claude-haiku-4-5-20251001",
+      "condition": "frozen",
+      "planned": 5,
+      "observed": 5,
+      "firstBuild": 4,
+      "firstBuildObserved": 5,
+      "finalPass": 5,
+      "finalWilson95": [
+        0.5655175352168251,
+        1
+      ],
+      "timelyPass": 5,
+      "medianDurationMs": 51000,
+      "timeouts": 0,
+      "missing": 0,
+      "failedBuilds": 4,
+      "buildToolErrors": 0,
+      "gradingErrors": 0,
+      "harnessErrors": 0
+    }
+  ],
+  "replicaComposition": [
+    {
+      "model": "gpt-6-luna",
+      "baseline": 1,
+      "frozen": 5,
+      "perGuide": 5
+    },
+    {
+      "model": "claude-haiku-4-5-20251001",
+      "baseline": 1,
+      "frozen": 4,
+      "perGuide": 5
+    }
+  ],
+  "protocol": {
+    "preparedAt": "2026-11-14T23:06:30.625Z",
+    "repeats": 5,
+    "timeoutMs": 240000,
+    "primaryOutcome": "Final submission passes every hidden test. Count all planned slots.",
+    "positiveSignal": "Both models gain final passes overall, and neither loses final passes on replica-read.",
+    "graderImage": "sha256:4269c7ae707c58ab66c1bb303ce50f364ab5abf9afb8d5912ca2852b4e6c4f28",
+    "sdkVersion": "11.0.100",
+    "packageVersion": "0.1.0-preview.6",
+    "agentPrompt": "Read prompt.md and implement the task by replacing Submission.cs. Preserve the public signature and use the provided Moderato.Effects package. Use the fixture tools to read task files, edit, and build. Read docs/agents.md before implementing. The documentation index is docs/llms.txt. You may use relevant workspace skills. Compile your final solution using the fixture build tool. Finish with a brief summary. The fixture writer `write_submission` is the authorized way to replace Submission.cs. Use it even when the CLI displays a read-only filesystem.",
+    "taskPrompts": {
+      "replica-read": "# Read from two replicas\n\nImplement `Submission.Read` without changing its signature. Start both replica reads concurrently on each execution. A typed failure from one replica leaves the other eligible to win. Return the first successful read and cancel the outstanding read. Await its release before returning.\n\nOpen a fresh handle for each started replica and close each successfully opened handle once, including after cancellation or a typed failure. Give each close its own read's exit and an uncanceled token. A losing replica's close exception is a defect even after the other replica succeeds. Caller cancellation interrupts the operation and still awaits registered cleanup. Building the effect must not open a handle.\n",
+      "catalog-fallback": "# Look up a catalog item with a selective fallback\n\nImplement `Submission.Lookup<R>` without changing its signature. Resolve the supplied environment's two services at execution time. Read the live catalog first with the run's cancellation token. When it returns `ItemMissing`, look up the same key in the archive and return the archive's typed result. If the live catalog returns a value or any other typed error, return that outcome unchanged without contacting the archive.\n\nUse the environment supplied to each execution, including when a constructed effect is reused. If the caller cancels a pending read, it ends as interruption. Unexpected exceptions remain defects. Constructing the effect must not contact either service.\n",
+      "bounded-validation": "# Validate a batch with limited concurrency\n\nImplement `Submission.Validate` without changing its signature. Run the supplied validation effects concurrently with at most `maxConcurrency` active validators. Each validator runs at most once per execution. Constructing the effect does not start validation.\n\nWhen all validators succeed, return their values in input order. If any return typed errors, run the entire batch and return all its typed errors in input order. Return an empty success for an empty batch. If the caller cancels, pass cancellation to active validators, await them, and report interruption. The concurrency limit is positive.\n"
+    },
+    "cohorts": [
+      {
+        "task": "replica-read",
+        "model": "gpt-6-luna",
+        "harness": "codex",
+        "harnessVersion": "codex-cli 0.166.0",
+        "fixtureRevision": "a5f528e97f214ee7b7ed58374c5bc985e4fa5bf8783a085200ea4a954e56b3c2",
+        "graderRevision": "7cee479d2c485962b46078285c062d35bc90628fe2683177d4c4632e5dfac0f9",
+        "manifestSha256": "274d15089b16d0cb58cc097f703f8c9857505ce28055ceaa0fce9e6109a17694",
+        "seed": "moderato-holdout-v1/replica-read/codex",
+        "order": [
+          {
+            "id": "baseline-1",
+            "condition": "baseline"
+          },
+          {
+            "id": "frozen-1",
+            "condition": "frozen"
+          },
+          {
+            "id": "frozen-2",
+            "condition": "frozen"
+          },
+          {
+            "id": "baseline-2",
+            "condition": "baseline"
+          },
+          {
+            "id": "frozen-3",
+            "condition": "frozen"
+          },
+          {
+            "id": "baseline-3",
+            "condition": "baseline"
+          },
+          {
+            "id": "frozen-4",
+            "condition": "frozen"
+          },
+          {
+            "id": "baseline-4",
+            "condition": "baseline"
+          },
+          {
+            "id": "baseline-5",
+            "condition": "baseline"
+          },
+          {
+            "id": "frozen-5",
+            "condition": "frozen"
+          }
+        ]
+      },
+      {
+        "task": "replica-read",
+        "model": "claude-haiku-4-5-20251001",
+        "harness": "claude",
+        "harnessVersion": "2.1.325 (Claude Code)",
+        "fixtureRevision": "a5f528e97f214ee7b7ed58374c5bc985e4fa5bf8783a085200ea4a954e56b3c2",
+        "graderRevision": "7cee479d2c485962b46078285c062d35bc90628fe2683177d4c4632e5dfac0f9",
+        "manifestSha256": "c978e138e349e42f0aa2b600e7be7855b6374316a3161348f8f749081bd3b7bd",
+        "seed": "moderato-holdout-v1/replica-read/claude",
+        "order": [
+          {
+            "id": "frozen-1",
+            "condition": "frozen"
+          },
+          {
+            "id": "baseline-1",
+            "condition": "baseline"
+          },
+          {
+            "id": "frozen-2",
+            "condition": "frozen"
+          },
+          {
+            "id": "baseline-2",
+            "condition": "baseline"
+          },
+          {
+            "id": "frozen-3",
+            "condition": "frozen"
+          },
+          {
+            "id": "baseline-3",
+            "condition": "baseline"
+          },
+          {
+            "id": "baseline-4",
+            "condition": "baseline"
+          },
+          {
+            "id": "frozen-4",
+            "condition": "frozen"
+          },
+          {
+            "id": "baseline-5",
+            "condition": "baseline"
+          },
+          {
+            "id": "frozen-5",
+            "condition": "frozen"
+          }
+        ]
+      },
+      {
+        "task": "catalog-fallback",
+        "model": "gpt-6-luna",
+        "harness": "codex",
+        "harnessVersion": "codex-cli 0.166.0",
+        "fixtureRevision": "680419ffac6aeebe54e825a43b30ceca12aa991ef2c0d6238184e87528d24022",
+        "graderRevision": "03abb5db200d36a109e17d959815a84377f11007401d1b9a039450bdd54aeacb",
+        "manifestSha256": "947429017a61d02b66e60935cac7595d9b2c65223fd78ce68fedb59c566a118a",
+        "seed": "moderato-holdout-v1/catalog-fallback/codex",
+        "order": [
+          {
+            "id": "baseline-1",
+            "condition": "baseline"
+          },
+          {
+            "id": "frozen-1",
+            "condition": "frozen"
+          },
+          {
+            "id": "baseline-2",
+            "condition": "baseline"
+          },
+          {
+            "id": "frozen-2",
+            "condition": "frozen"
+          },
+          {
+            "id": "frozen-3",
+            "condition": "frozen"
+          },
+          {
+            "id": "baseline-3",
+            "condition": "baseline"
+          },
+          {
+            "id": "frozen-4",
+            "condition": "frozen"
+          },
+          {
+            "id": "baseline-4",
+            "condition": "baseline"
+          },
+          {
+            "id": "baseline-5",
+            "condition": "baseline"
+          },
+          {
+            "id": "frozen-5",
+            "condition": "frozen"
+          }
+        ]
+      },
+      {
+        "task": "catalog-fallback",
+        "model": "claude-haiku-4-5-20251001",
+        "harness": "claude",
+        "harnessVersion": "2.1.325 (Claude Code)",
+        "fixtureRevision": "680419ffac6aeebe54e825a43b30ceca12aa991ef2c0d6238184e87528d24022",
+        "graderRevision": "03abb5db200d36a109e17d959815a84377f11007401d1b9a039450bdd54aeacb",
+        "manifestSha256": "90bd7288830c759ab350e6d79a4478107352469561d400990b2423ffa5f622e7",
+        "seed": "moderato-holdout-v1/catalog-fallback/claude",
+        "order": [
+          {
+            "id": "frozen-1",
+            "condition": "frozen"
+          },
+          {
+            "id": "baseline-1",
+            "condition": "baseline"
+          },
+          {
+            "id": "baseline-2",
+            "condition": "baseline"
+          },
+          {
+            "id": "frozen-2",
+            "condition": "frozen"
+          },
+          {
+            "id": "frozen-3",
+            "condition": "frozen"
+          },
+          {
+            "id": "baseline-3",
+            "condition": "baseline"
+          },
+          {
+            "id": "baseline-4",
+            "condition": "baseline"
+          },
+          {
+            "id": "frozen-4",
+            "condition": "frozen"
+          },
+          {
+            "id": "frozen-5",
+            "condition": "frozen"
+          },
+          {
+            "id": "baseline-5",
+            "condition": "baseline"
+          }
+        ]
+      },
+      {
+        "task": "bounded-validation",
+        "model": "gpt-6-luna",
+        "harness": "codex",
+        "harnessVersion": "codex-cli 0.166.0",
+        "fixtureRevision": "c155034c2964a233330b13e63eb5af9142c483c0a823d6d3cc4fcc2b0c4b9aa9",
+        "graderRevision": "bc1f3a06e547c5cf4ff414949eef7e84d3a45081a0c5740997bbe578360ec7e8",
+        "manifestSha256": "98801c6a6952ce4c2c8dec9f1337c7e413bb4035906f94bd573023637b3a8e92",
+        "seed": "moderato-holdout-v1/bounded-validation/codex",
+        "order": [
+          {
+            "id": "baseline-1",
+            "condition": "baseline"
+          },
+          {
+            "id": "frozen-1",
+            "condition": "frozen"
+          },
+          {
+            "id": "baseline-2",
+            "condition": "baseline"
+          },
+          {
+            "id": "frozen-2",
+            "condition": "frozen"
+          },
+          {
+            "id": "frozen-3",
+            "condition": "frozen"
+          },
+          {
+            "id": "baseline-3",
+            "condition": "baseline"
+          },
+          {
+            "id": "frozen-4",
+            "condition": "frozen"
+          },
+          {
+            "id": "baseline-4",
+            "condition": "baseline"
+          },
+          {
+            "id": "baseline-5",
+            "condition": "baseline"
+          },
+          {
+            "id": "frozen-5",
+            "condition": "frozen"
+          }
+        ]
+      },
+      {
+        "task": "bounded-validation",
+        "model": "claude-haiku-4-5-20251001",
+        "harness": "claude",
+        "harnessVersion": "2.1.325 (Claude Code)",
+        "fixtureRevision": "c155034c2964a233330b13e63eb5af9142c483c0a823d6d3cc4fcc2b0c4b9aa9",
+        "graderRevision": "bc1f3a06e547c5cf4ff414949eef7e84d3a45081a0c5740997bbe578360ec7e8",
+        "manifestSha256": "0d4ba19cc8c2e546ff11e3ddd94c53e5680c6de2140d7cf9e42a44a2c5d2a78a",
+        "seed": "moderato-holdout-v1/bounded-validation/claude",
+        "order": [
+          {
+            "id": "baseline-1",
+            "condition": "baseline"
+          },
+          {
+            "id": "frozen-1",
+            "condition": "frozen"
+          },
+          {
+            "id": "baseline-2",
+            "condition": "baseline"
+          },
+          {
+            "id": "frozen-2",
+            "condition": "frozen"
+          },
+          {
+            "id": "frozen-3",
+            "condition": "frozen"
+          },
+          {
+            "id": "baseline-3",
+            "condition": "baseline"
+          },
+          {
+            "id": "frozen-4",
+            "condition": "frozen"
+          },
+          {
+            "id": "baseline-4",
+            "condition": "baseline"
+          },
+          {
+            "id": "frozen-5",
+            "condition": "frozen"
+          },
+          {
+            "id": "baseline-5",
+            "condition": "baseline"
+          }
+        ]
+      }
+    ]
+  }
+}

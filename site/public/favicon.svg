@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="376" height="376" viewBox="96 57 376 376" role="img" aria-labelledby="title">
+  <title id="title">Moderato.Effects symbol</title>
+  <defs>
+    <linearGradient id="frame-color" x1="150" y1="105" x2="425" y2="370" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#504d83"/>
+      <stop offset="1" stop-color="#46436f"/>
+    </linearGradient>
+    <linearGradient id="ribbon-purple" x1="264" y1="212" x2="150" y2="340" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#877bdf"/>
+      <stop offset="1" stop-color="#8c7fe6"/>
+    </linearGradient>
+    <linearGradient id="ribbon-fold-color" x1="267" y1="246" x2="300" y2="296" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#796fc8"/>
+      <stop offset="1" stop-color="#625eaa"/>
+    </linearGradient>
+    <linearGradient id="ribbon-lilac" x1="366" y1="239" x2="315" y2="345" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#b6a1f5"/>
+      <stop offset="1" stop-color="#bda6fa"/>
+    </linearGradient>
+  </defs>
+  <g id="symbol">
+    <path id="hexagon-frame" fill="url(#frame-color)"
+          d="M132.4 271.8 L131.4 196 C131.3 173.4 141.5 156.2 160.7 145
+             L257.6 89 C276.2 78.2 292 77.4 311.9 88.9 L406.8 144.5
+             C426.2 155.9 436.7 172.3 436.7 193.8 L437.5 300.8
+             C437.7 323.8 426.5 338.3 407.5 349.1 L317.2 402.6
+             C299.7 413.1 281.4 414.2 264 405 L181.5 356.6 L200.7 340.6
+             L273.7 383.4 C283.2 389 294.5 389.2 304.9 383.2 L396 329.2
+             C407.3 322.5 413.8 311.9 413.7 298.8 L412.9 196.1
+             C412.8 182.5 407.5 172.5 395.6 165.1 L301.4 109.9
+             C289.6 102.9 280.3 102.8 268.1 109.8 L172.9 165.5
+             C161.1 172.3 155 181.7 155.1 195 L155.3 248.3 Z"/>
+    <path id="ribbon-right" fill="url(#ribbon-lilac)"
+          d="M248.4 267.4 C259.8 255.6 283.9 244.3 296.1 250.2
+             L310 272.9 Q315 280.3 320.1 274.2 L342.7 250.2
+             C360.9 231.2 384 222.7 399 234.2 Q401.8 236.4 401.8 239.6
+             L401.8 268.9 C382.7 285.4 361.5 314.9 342.6 331.9
+             C330.3 343 318.3 346 307 341.2 C289.4 333.9 276.7 309.1 263.3 285.1
+             Q254.2 267.8 248.4 267.4 Z"/>
+    <path id="ribbon-fold" fill="url(#ribbon-fold-color)"
+          d="M245.6 269.9 C262.7 254.2 281.3 241 294.8 246.4
+             C300.4 255.2 305.1 264.7 311 273.5 Q314.8 279.1 319.4 275.2
+             C309.5 287.4 298.1 299.1 283.3 299.1 Q275.3 299 269.1 294.8
+             C264.2 287.2 259.7 278.9 255.1 272.2 Q251.2 266.1 245.6 269.9 Z"/>
+    <path id="ribbon-left" fill="url(#ribbon-purple)"
+          d="M132.5 292.9 L174.4 247.5 C196.6 223.4 217.8 206.4 240 206.4
+             C264.1 206.4 281 220.8 295.3 248.1 C279.3 245 267.1 250.1 249.2 269
+             C233.4 283.3 207.6 312.8 189.3 330.5 C176.9 342.9 164.4 346.3 153.8 341
+             C139.6 334 130.8 315.9 132.5 292.9 Z"/>
+    <path id="star" fill="#6e69b4"
+          d="M319.7 148.4 C320.5 145.4 323.7 145.3 324.7 148.3
+             C330.3 167.9 333.8 171.5 352.5 177.8 C355.5 178.8 355.7 181.8 352.6 182.9
+             C333.5 189 330.5 193.2 325 211.3 C324 214.8 321.1 215 319.9 211.4
+             C314.2 193 310.1 189.3 292.2 183 C288.7 181.8 288.7 179.1 292 177.8
+             C309.6 171.9 313.9 167.8 319.7 148.4 Z"/>
+  </g>
+</svg>

@@ -30,7 +30,7 @@ jobs:
       - run: npm ci
       - run: npm run build
         env:
-          PUBLIC_DOCS_ORIGIN: ${{ vars.PUBLIC_DOCS_ORIGIN || 'https://codex-agent-guide-moderato-effects.009singup.workers.dev' }}
+          PUBLIC_DOCS_ORIGIN: ${{ vars.PUBLIC_DOCS_ORIGIN || 'https://moderato-effects.009singup.workers.dev' }}
       - name: Deploy the research Worker
         env:
           CLOUDFLARE_ACCOUNT_ID: 9ee09f6e78d16822c33541c7f48947c6

@@ -18,6 +18,6 @@ The report links to the public Moderato.Effects documentation by default. Set `P
 
 The [publish workflow](../.github/workflows/publish-research-site.yml) builds, tests, and deploys changes to `site/` pushed to `docs/agent-dx-site`. The `moderato-effects-agent-dx` Worker serves `dist/` as static assets on `workers.dev`.
 
-Set the `CLOUDFLARE_API_TOKEN` repository secret to a token with Workers Scripts write access for the target Cloudflare account. The workflow uses the documentation Preview for guide links. Set the `PUBLIC_DOCS_ORIGIN` repository variable to the public documentation origin once the guides are published.
+Set the `CLOUDFLARE_API_TOKEN` repository secret to a token with Workers Scripts write access for the target Cloudflare account. The workflow links to the public documentation. Set the `PUBLIC_DOCS_ORIGIN` repository variable to override the links.
 
 Validate packaging locally with `npx wrangler deploy --dry-run` after the build.

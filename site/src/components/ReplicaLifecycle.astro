@@ -1,0 +1,35 @@
+<section class="dx-section dx-replica-lifecycle" id="replica-lifecycle" aria-labelledby="replica-lifecycle-title">
+    <header class="dx-section-heading">
+        <div>
+            <p class="dx-kicker">WHY REPLICA READ WAS DIFFICULT</p>
+            <h2 id="replica-lifecycle-title">Winning the race is not enough</h2>
+            <p>The task required two reads to run concurrently, while making sure each opened handle was closed correctly—even when its read lost the race.</p>
+        </div>
+    </header>
+    <div class="dx-replica-diagram" role="img" aria-label="Two replicas each open a handle, read, and close with their own exit case. The first successful read wins; the other is canceled. The final result waits for cleanup of both replicas, and a cleanup exception remains a defect.">
+        <div class="dx-replica-lanes">
+            <div class="dx-replica-lane">
+                <strong class="dx-replica-label">Replica A</strong>
+                <span class="dx-replica-node">Open handle</span>
+                <span class="dx-replica-arrow" aria-hidden="true">→</span>
+                <span class="dx-replica-node">Read</span>
+                <span class="dx-replica-arrow" aria-hidden="true">→</span>
+                <span class="dx-replica-node dx-replica-release">Close (exit A)</span>
+            </div>
+            <div class="dx-replica-lane">
+                <strong class="dx-replica-label">Replica B</strong>
+                <span class="dx-replica-node">Open handle</span>
+                <span class="dx-replica-arrow" aria-hidden="true">→</span>
+                <span class="dx-replica-node">Read</span>
+                <span class="dx-replica-arrow" aria-hidden="true">→</span>
+                <span class="dx-replica-node dx-replica-release">Close (exit B)</span>
+            </div>
+        </div>
+        <div class="dx-replica-merge" aria-hidden="true">↓</div>
+        <div class="dx-replica-end">
+            <strong>First successful read wins</strong>
+            <span>Cancel outstanding work · Await releases · Preserve cleanup defects</span>
+        </div>
+    </div>
+    <p class="dx-replica-note">This diagram illustrates the behavior required by the <em>Replica read</em> evaluation task. A successful read does not excuse a losing replica from cleanup; the release receives that replica's own exit case.</p>
+</section>

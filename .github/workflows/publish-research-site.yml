@@ -1,0 +1,44 @@
+name: Publish Agent DX research
+
+on:
+  push:
+    branches: [docs/agent-dx-site]
+    paths:
+      - 'site/**'
+      - '.github/workflows/publish-research-site.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: publish-agent-dx-research
+  cancel-in-progress: true
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: site
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/setup-node@2028fbc5c25fe9cf00d9f06a71cc4710d4507903 # v6.0.0
+        with:
+          node-version-file: site/.node-version
+          cache: npm
+          cache-dependency-path: site/package-lock.json
+      - run: npm ci
+      - run: npm run build
+        env:
+          PUBLIC_DOCS_ORIGIN: ${{ vars.PUBLIC_DOCS_ORIGIN || 'https://codex-agent-guide-moderato-effects.009singup.workers.dev' }}
+      - name: Deploy the research Worker
+        env:
+          CLOUDFLARE_ACCOUNT_ID: 9ee09f6e78d16822c33541c7f48947c6
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          WRANGLER_SEND_METRICS: 'false'
+        run: |
+          if [ -z "$CLOUDFLARE_API_TOKEN" ]; then
+            echo "::error::Set the CLOUDFLARE_API_TOKEN repository secret before deploying."
+            exit 1
+          fi
+          npx --no-install wrangler deploy

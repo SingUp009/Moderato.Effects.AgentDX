@@ -16,6 +16,8 @@ The report links to the public Moderato.Effects documentation by default. Set `P
 
 ## Cloudflare Workers
 
-Use `site` as the build root and `npm run build` as the build command. The `moderato-effects-agent-dx` Worker serves `dist/` as static assets on `workers.dev`.
+The [publish workflow](../.github/workflows/publish-research-site.yml) builds, tests, and deploys changes to `site/` pushed to `docs/agent-dx-site`. The `moderato-effects-agent-dx` Worker serves `dist/` as static assets on `workers.dev`.
 
-Validate packaging from `site/` with `npx wrangler deploy --dry-run` after the build. A non-production build can use `npx wrangler preview`. Configure the Worker and connect the repository before setting up automatic deployments.
+Set the `CLOUDFLARE_API_TOKEN` repository secret to a token with Workers Scripts write access for the target Cloudflare account. The workflow uses the documentation Preview for guide links. Set the `PUBLIC_DOCS_ORIGIN` repository variable to the public documentation origin once the guides are published.
+
+Validate packaging locally with `npx wrangler deploy --dry-run` after the build.

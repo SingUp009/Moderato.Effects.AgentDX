@@ -1,6 +1,9 @@
 ---
 import AgentDxChart from './AgentDxChart';
 import HoldoutResults from './HoldoutResults.astro';
+import TaskOutcomeDiagram from './TaskOutcomeDiagram.astro';
+import ReplicaLifecycle from './ReplicaLifecycle.astro';
+import EvaluationFlow from './EvaluationFlow.astro';
 import holdout from '../data/holdout-results.json';
 import report from '../data/agent-dx.json';
 import '../styles/agent-dx.css';
@@ -42,7 +45,11 @@ const perVersion = holdout.rows.filter(row => row.condition === 'frozen')
         </div>
     </section>
 
+    <TaskOutcomeDiagram />
+
     {holdout && <HoldoutResults />}
+
+    <ReplicaLifecycle />
 
     <section class="dx-section" aria-labelledby="findings-heading">
         <header class="dx-section-heading">
@@ -96,6 +103,8 @@ const perVersion = holdout.rows.filter(row => row.condition === 'frozen')
             </div>
         </details>
     </section>
+
+    <EvaluationFlow />
 
     <section class="dx-section dx-method" id="methods" aria-labelledby="methods-heading">
         <div>

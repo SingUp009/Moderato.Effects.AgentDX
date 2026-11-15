@@ -16,6 +16,13 @@ test('Agent DX build publishes matching counts and the frozen guide download', (
     assert.ok(page.includes('/agent-dx/results.json'));
     assert.ok(page.includes(report.guide.sha256));
     assert.ok(page.includes('/agent-dx/guide-snapshots.zip'));
+    // The public report includes visual explanations of outcomes, ownership, and evaluation.
+    assert.ok(page.includes('id="task-outcomes"'));
+    assert.ok(page.includes('id="replica-lifecycle"'));
+    assert.ok(page.includes('id="evaluation-process"'));
+    assert.ok(page.includes('dx-task-visual'));
+    assert.ok(page.includes('dx-replica-diagram'));
+    assert.ok(page.includes('dx-evaluation-flow'));
     if (report.holdout.status === 'complete') {
         const completed = report.holdout.results;
         assert.equal(completed.observed, completed.planned);

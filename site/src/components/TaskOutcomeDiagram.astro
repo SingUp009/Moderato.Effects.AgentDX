@@ -1,0 +1,58 @@
+---
+import raw from '../data/holdout-results.json';
+
+type ResultRow = { task: string; condition: string; planned: number; finalPass: number };
+const rows = raw.rows as ResultRow[];
+const count = (task: string, condition: string) => rows
+    .filter(row => row.task === task && row.condition === condition)
+    .reduce((acc, row) => ({ passes: acc.passes + row.finalPass, total: acc.total + row.planned }), { passes: 0, total: 0 });
+
+const tasks = [
+    { id: 'replica-read', name: 'Replica read', detail: 'Parallel reads, cancellation, resource cleanup' },
+    { id: 'catalog-fallback', name: 'Catalog fallback', detail: 'Typed errors and selective fallback' },
+    { id: 'bounded-validation', name: 'Bounded validation', detail: 'Limited concurrency and ordered results' },
+].map(task => ({ ...task, original: count(task.id, 'baseline'), improved: count(task.id, 'frozen') }));
+
+if (tasks.some(task => task.original.total === 0 || task.original.total !== task.improved.total)) {
+    throw new Error('The documentation comparisons must have matching, nonempty task cohorts.');
+}
+---
+
+<section class="dx-section dx-task-outcomes" id="task-outcomes" aria-labelledby="task-outcomes-title">
+    <header class="dx-section-heading">
+        <div>
+            <p class="dx-kicker">WHERE THE DIFFERENCE APPEARED</p>
+            <h2 id="task-outcomes-title">The hardest task showed the improvement</h2>
+            <p>Each dot represents one agent submission. Filled dots passed every hidden behavioral test. Results combine both evaluated models.</p>
+        </div>
+    </header>
+    <div class="dx-task-visual">
+        <div class="dx-task-head" aria-hidden="true">
+            <span>Task</span><span>Original documentation</span><span>Improved documentation</span>
+        </div>
+        {tasks.map(task => (
+            <div class="dx-task-row">
+                <div class="dx-task-name">
+                    <h3>{task.name}</h3>
+                    <p>{task.detail}</p>
+                </div>
+                {(['original', 'improved'] as const).map(version => (
+                    <div class="dx-task-dots" data-version={version} aria-label={`${task.name}: ${version} documentation, ${task[version].passes} of ${task[version].total} submissions passed`}>
+                        <span class="dx-task-mobile-label">{version === 'original' ? 'Original documentation' : 'Improved documentation'}</span>
+                        <div class="dx-dot-strip" aria-hidden="true">
+                            {Array.from({length: task[version].total}, (_, index) => (
+                                <span class={index < task[version].passes ? 'dx-task-dot is-pass' : 'dx-task-dot'}></span>
+                            ))}
+                        </div>
+                        <strong class="dx-task-number">{task[version].passes}/{task[version].total}</strong>
+                    </div>
+                ))}
+            </div>
+        ))}
+        <div class="dx-task-legend">
+            <span><i class="dx-task-dot is-pass" aria-hidden="true"></i> Passed all hidden tests</span>
+            <span><i class="dx-task-dot" aria-hidden="true"></i> Did not pass all hidden tests</span>
+        </div>
+    </div>
+    <p class="dx-task-note">The additional four correct implementations all came from Replica read. The remaining two tasks were already passed in every trial, so they cannot show further gains in this evaluation.</p>
+</section>

@@ -1,0 +1,40 @@
+<section class="dx-section dx-process" id="evaluation-process" aria-labelledby="evaluation-process-title">
+    <header class="dx-section-heading">
+        <div>
+            <p class="dx-kicker">HOW WE TESTED THE CODE</p>
+            <h2 id="evaluation-process-title">From documentation to verified behavior</h2>
+            <p>The evaluation checks working C# implementations, not whether an agent can produce plausible-looking source code.</p>
+        </div>
+    </header>
+    <ol class="dx-evaluation-flow">
+        <li>
+            <span class="dx-flow-number" aria-hidden="true">01</span>
+            <div>
+                <h3>Provide documentation</h3>
+                <p>Each agent receives the original or improved guide with the same task, SDK, and package version.</p>
+            </div>
+        </li>
+        <li>
+            <span class="dx-flow-number" aria-hidden="true">02</span>
+            <div>
+                <h3>Implement &amp; build</h3>
+                <p>The agent writes C# in an isolated fixture and can use compiler diagnostics to correct its implementation.</p>
+            </div>
+        </li>
+        <li>
+            <span class="dx-flow-number" aria-hidden="true">03</span>
+            <div>
+                <h3>Run hidden behavioral tests</h3>
+                <p>A separate grader tests the final saved submission, including error cases, cancellation, and cleanup.</p>
+            </div>
+        </li>
+        <li>
+            <span class="dx-flow-number" aria-hidden="true">04</span>
+            <div>
+                <h3>Count fully correct submissions</h3>
+                <p>A submission passes only if it passes every hidden test. All planned attempts count in the denominator.</p>
+            </div>
+        </li>
+    </ol>
+    <p class="dx-process-note">The evaluation compares the complete documentation versions. It does not isolate the effect of any one example, <code>llms.txt</code>, or an Agent Skill.</p>
+</section>
